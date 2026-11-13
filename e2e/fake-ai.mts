@@ -148,6 +148,8 @@ const answers: Record<string, (messages: Message[]) => unknown> = {
       city: "Utrecht",
       country: null,
       linkedin: null,
+      license: null,
+      residence: null,
       summary: null,
     },
     skills: ["Figma", "Service design"],
