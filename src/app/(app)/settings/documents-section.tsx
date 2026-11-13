@@ -17,10 +17,13 @@ import { PAPER_SIZES } from "@/lib/themes";
 import { TONES } from "@/lib/tones";
 import { useAutosave } from "@/hooks/use-autosave";
 
+import { setBaseTheme } from "../resume/actions";
 import { addDocumentLanguage, updateSettings } from "./actions";
 import { SettingsSectionIntro } from "./settings-screen";
 
 export type DocumentSettings = {
+  /** The default resume format: the id of the base theme. */
+  baseThemeId: string;
   paper: PaperSize;
   dateFormat: DateFormat;
   defaultTone: Tone;
@@ -42,9 +45,12 @@ const OTHER_LANGUAGE = "__other";
  */
 export function DocumentsSection({
   initial,
+  themes,
   preview,
 }: {
   initial: DocumentSettings;
+  /** The themes the default resume format can be: the built-in ones, then the user's own. */
+  themes: { id: string; name: string; builtIn: boolean }[];
   /** For the file name's preview: the user's name and the latest application, or sample values. */
   preview: { name: string; company: string; role: string };
 }) {
@@ -59,6 +65,15 @@ export function DocumentsSection({
     setSettings({ ...settings, ...next });
     void track(updateSettings(next)).then((result) => {
       if (!toastResult(result).ok) setSettings(previous);
+    });
+  };
+
+  // The default format is the base resume theme, which Resume → Themes sets too.
+  const changeFormat = (baseThemeId: string) => {
+    const previous = settings.baseThemeId;
+    setSettings({ ...settings, baseThemeId });
+    void track(setBaseTheme({ id: baseThemeId })).then((result) => {
+      if (!toastResult(result).ok) setSettings((current) => ({ ...current, baseThemeId: previous }));
     });
   };
 
@@ -99,6 +114,34 @@ export function DocumentsSection({
     <>
       <SettingsSectionIntro title="Documents">Defaults for every new application. You can still change them per job.</SettingsSectionIntro>
       <Card padding="none" className="grid gap-x-[18px] gap-y-5 px-7 py-[26px] sm:grid-cols-2">
+        <Select
+          label="Default resume format"
+          hint="The base resume and every new application start in this theme. Ram and Priya are the two-column formats; Resume → Themes shows them all."
+          value={settings.baseThemeId}
+          onChange={(event) => changeFormat(event.target.value)}
+          className="sm:col-span-2"
+        >
+          <optgroup label="Built-in">
+            {themes
+              .filter((theme) => theme.builtIn)
+              .map((theme) => (
+                <option key={theme.id} value={theme.id}>
+                  {theme.name}
+                </option>
+              ))}
+          </optgroup>
+          {themes.some((theme) => !theme.builtIn) && (
+            <optgroup label="Your themes">
+              {themes
+                .filter((theme) => !theme.builtIn)
+                .map((theme) => (
+                  <option key={theme.id} value={theme.id}>
+                    {theme.name}
+                  </option>
+                ))}
+            </optgroup>
+          )}
+        </Select>
         <Select label="Paper size" value={settings.paper} onChange={(event) => change({ paper: event.target.value as PaperSize })}>
           {Object.entries(PAPER_SIZES).map(([value, size]) => (
             <option key={value} value={value}>

@@ -155,7 +155,10 @@ function ThemeThumbnail({
   userName: string;
   onSelect: () => void;
 }) {
-  const { split, sidebarEnd, tintedSidebar, sideHeadings, centered, banner, onAccent, timeline } = resolveTheme(theme);
+  const { split, sidebarEnd, tintedSidebar, sideHeadings, centered: centeredAlign, banner, onAccent, timeline: timelineDates, columns } = resolveTheme(theme);
+  // Two-column entries have a centred header and, like a timeline, something before each entry's text.
+  const centered = centeredAlign || columns;
+  const timeline = timelineDates || columns;
   const accent = { background: theme.accent };
   const name = (
     <span

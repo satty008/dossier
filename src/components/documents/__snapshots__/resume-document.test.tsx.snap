@@ -4539,6 +4539,1436 @@ exports[`ResumeDocument > renders the demo profile in Modern 1`] = `
 </article>
 `;
 
+exports[`ResumeDocument > renders the demo profile in Priya 1`] = `
+<article
+  aria-label="Resume"
+  class="_page_fa1ef7 _twoColumn_fa1ef7 _twoColumnCompact_fa1ef7 _centered_fa1ef7"
+  dir="ltr"
+  style="--page-height: 905; --paper-width: 210; --paper-height: 297; --pad-y: 30.48; --pad-x: 45.71; --gap: 15.96; --item-gap: 15.96; --font-size: 10.21; --line-height: 1.21; --head-font: var(--script-fonts), var(--typeface-greek-sans), var(--typeface-roboto); --body-font: var(--script-fonts), var(--typeface-greek-sans), var(--typeface-source-sans); --accent: #262f99; --name-size: 25; --name-weight: 600; --heading-size: 12; --heading-weight: 600; --heading-transform: none; --heading-tracking: 0; --heading-rule: 1; --heading-padding: 3; --sidebar-width: 150; --sidebar-gap: 28;"
+>
+  <header
+    class="_header_fa1ef7 _twoColumnHeader_fa1ef7"
+  >
+    <h1
+      class="_name_fa1ef7"
+    >
+      <span
+        class="_nameFirst_fa1ef7"
+      >
+        Jane
+      </span>
+       
+      <span
+        class="_nameLast_fa1ef7"
+      >
+        Doe
+      </span>
+    </h1>
+    <p
+      class="_headline_fa1ef7"
+    >
+      Senior Product Designer
+    </p>
+    <p
+      class="_address_fa1ef7"
+    >
+      <span
+        class="_contact_fa1ef7"
+      >
+        <svg
+          aria-hidden="true"
+          class="_icon_fa1ef7"
+          focusable="false"
+          viewBox="0 0 576 512"
+        >
+          <path
+            d="M288 -16C306 -16 320 -2 320 16V34C418 48 496 126 510 224H528C546 224 560 238 560 256C560 274 546 288 528 288H510C496 386 418 464 320 478V496C320 514 306 528 288 528C270 528 256 514 256 496V478C158 464 80 386 66 288H48C30 288 16 274 16 256C16 238 30 224 48 224H66C80 126 158 48 256 34V16C256 -2 270 -16 288 -16ZM128 256C128 344 200 416 288 416C376 416 448 344 448 256C448 168 376 96 288 96C200 96 128 168 128 256ZM288 160C341 160 384 203 384 256C384 309 341 352 288 352C235 352 192 309 192 256C192 203 235 160 288 160Z"
+          />
+        </svg>
+        <bdi
+          dir="ltr"
+        >
+          Westersingel 42, Rotterdam, Netherlands
+        </bdi>
+      </span>
+    </p>
+    <p
+      class="_contactLine_fa1ef7"
+    >
+      <span
+        class="_contact_fa1ef7"
+      >
+        <svg
+          aria-hidden="true"
+          class="_icon_fa1ef7"
+          focusable="false"
+          viewBox="0 0 448 512"
+        >
+          <path
+            d="M64 32C29 32 0 61 0 96V416C0 451 29 480 64 480H384C419 480 448 451 448 416V96C448 61 419 32 384 32H64ZM152 129C162 126 172 131 176 141L196 189C200 198 197 207 190 213L168 231C185 267 213 296 248 313L267 290C273 283 282 280 291 284L339 304C349 308 354 318 351 328L350 331C342 363 310 391 272 383C185 364 116 295 97 208C89 170 117 138 149 129H152Z"
+          />
+        </svg>
+        <bdi
+          dir="ltr"
+        >
+          +31 6 1234 5678
+        </bdi>
+      </span>
+      <span
+        aria-hidden="true"
+        class="_bar_fa1ef7"
+      >
+        |
+      </span>
+      <span
+        class="_contact_fa1ef7"
+      >
+        <svg
+          aria-hidden="true"
+          class="_icon_fa1ef7"
+          focusable="false"
+          viewBox="0 0 512 512"
+        >
+          <path
+            d="M61 64C28 64 0 92 0 125C0 126 0 127 0 128V384C0 419 29 448 64 448H448C483 448 512 419 512 384V128C512 127 512 126 512 125C512 92 485 64 451 64H61ZM464 192V384C464 393 457 400 448 400H64C55 400 48 393 48 384V192L203 310C234 334 278 334 309 310L464 192ZM48 125C48 118 54 112 61 112H451C458 112 464 118 464 125C464 130 462 134 459 136L280 272C266 282 246 282 232 272L53 136C50 134 48 130 48 125Z"
+          />
+        </svg>
+        <a
+          class="_contactLink_fa1ef7"
+          href="mailto:jane.doe@example.com"
+          rel="noreferrer"
+          target="_blank"
+        >
+          <bdi
+            dir="ltr"
+          >
+            jane.doe@example.com
+          </bdi>
+        </a>
+      </span>
+      <span
+        aria-hidden="true"
+        class="_bar_fa1ef7"
+      >
+        |
+      </span>
+      <span
+        class="_contact_fa1ef7"
+      >
+        <svg
+          aria-hidden="true"
+          class="_icon_fa1ef7"
+          focusable="false"
+          viewBox="0 0 512 512"
+        >
+          <path
+            d="M352 280H161C164 345 178 404 199 447C210 472 222 489 234 500C245 510 253 512 257 512C261 512 268 510 279 500C291 489 303 472 315 447C335 404 349 345 352 280ZM161 232H352C349 168 335 108 314 65C303 40 291 23 279 12C268 2 260 0 256 0C252 0 245 2 234 12C222 23 210 40 198 65C178 108 164 168 161 232ZM113 232C116 146 139 67 171 15C79 47 11 131 2 232H113ZM2 280C11 381 79 465 171 497C139 445 116 366 113 280H2ZM400 280C396 366 374 445 342 497C434 465 502 381 511 280H400ZM511 232C502 131 434 47 342 15C374 67 396 146 400 232H511Z"
+          />
+        </svg>
+        <a
+          class="_contactLink_fa1ef7"
+          href="https://example.com/"
+          rel="noreferrer"
+          target="_blank"
+        >
+          <bdi
+            dir="ltr"
+          >
+            example.com
+          </bdi>
+        </a>
+      </span>
+      <span
+        aria-hidden="true"
+        class="_bar_fa1ef7"
+      >
+        |
+      </span>
+      <span
+        class="_contact_fa1ef7"
+      >
+        <svg
+          aria-hidden="true"
+          class="_icon_fa1ef7"
+          focusable="false"
+          viewBox="0 0 448 512"
+        >
+          <path
+            d="M416 32H32C14 32 0 47 0 64V448C0 466 14 480 32 480H416C434 480 448 466 448 448V64C448 47 434 32 416 32ZM135 416H69V202H136V416H135ZM102 96C123 96 141 113 141 135C141 156 123 173 102 173C81 173 64 156 64 135C64 113 81 96 102 96ZM384 416H318V312C318 287 317 255 283 255C249 255 244 282 244 310V416H177V202H241V231H242C251 215 272 197 305 197C372 197 384 241 384 299V416Z"
+          />
+        </svg>
+        <a
+          class="_contactLink_fa1ef7"
+          href="https://linkedin.com/in/janedoe-example"
+          rel="noreferrer"
+          target="_blank"
+        >
+          <bdi
+            dir="ltr"
+          >
+            Jane Doe
+          </bdi>
+        </a>
+      </span>
+    </p>
+  </header>
+  <div
+    class="_columns_fa1ef7"
+  >
+    <div
+      class="_column_fa1ef7"
+    >
+      <section
+        class="_section_fa1ef7"
+      >
+        <h2
+          class="_sectionTitle_fa1ef7"
+        >
+          Profile
+        </h2>
+        <div
+          data-unit="summary"
+        >
+          <p
+            class="_summary_fa1ef7"
+          >
+            Product designer with nine years of experience turning complicated operational tools into calm, usable software. I like working close to engineering and closer to the people who use what we build.
+          </p>
+        </div>
+      </section>
+      <section
+        class="_section_fa1ef7"
+      >
+        <h2
+          class="_sectionTitle_fa1ef7"
+        >
+          Experience
+        </h2>
+        <div
+          class="_entry_fa1ef7 _entryPlain_fa1ef7"
+          data-unit="experience:e1"
+        >
+          <div
+            class="_entryHead_fa1ef7"
+          >
+            <div
+              class="_entryMeta_fa1ef7"
+            >
+              <span
+                class="_metaDates_fa1ef7"
+              >
+                03/2021 – Present
+              </span>
+              <span
+                class="_metaPlace_fa1ef7"
+              >
+                Rotterdam
+              </span>
+            </div>
+            <p
+              class="_columnTitle_fa1ef7"
+            >
+              <span
+                class="_entryTitle_fa1ef7"
+              >
+                Senior Product Designer
+              </span>
+              <span
+                class="_entryAt_fa1ef7"
+              >
+                Northwind Logistics
+              </span>
+            </p>
+          </div>
+          <p
+            class="_descriptor_fa1ef7"
+          >
+            Freight platform for European carriers, 300 people
+          </p>
+          <ul
+            class="_bullets_fa1ef7"
+          >
+            <li>
+              Led the redesign of the carrier portal used daily by 4,000+ dispatchers
+            </li>
+            <li>
+              Built and maintained the design system across six product teams
+            </li>
+            <li>
+              Mentored three junior designers through their first year
+            </li>
+          </ul>
+          <p
+            class="_entrySkills_fa1ef7"
+          >
+            <span
+              class="_accent_fa1ef7"
+            >
+              Skills · 
+            </span>
+            Interaction design, Design systems, User research, Workshop facilitation
+          </p>
+        </div>
+        <div
+          class="_entry_fa1ef7 _entryPlain_fa1ef7"
+          data-unit="experience:e2"
+        >
+          <div
+            class="_entryHead_fa1ef7"
+          >
+            <div
+              class="_entryMeta_fa1ef7"
+            >
+              <span
+                class="_metaDates_fa1ef7"
+              >
+                06/2018 – 02/2021
+              </span>
+              <span
+                class="_metaPlace_fa1ef7"
+              >
+                Amsterdam
+              </span>
+            </div>
+            <p
+              class="_columnTitle_fa1ef7"
+            >
+              <span
+                class="_entryTitle_fa1ef7"
+              >
+                Product Designer
+              </span>
+              <span
+                class="_entryAt_fa1ef7"
+              >
+                Fieldnote
+              </span>
+            </p>
+          </div>
+          <p
+            class="_descriptor_fa1ef7"
+          >
+            Note-taking app for field researchers
+          </p>
+          <ul
+            class="_bullets_fa1ef7"
+          >
+            <li>
+              Designed the mobile note-taking app from first prototype to 120k users
+            </li>
+            <li>
+              Ran monthly research sessions with field researchers
+            </li>
+          </ul>
+          <p
+            class="_entrySkills_fa1ef7"
+          >
+            <span
+              class="_accent_fa1ef7"
+            >
+              Skills · 
+            </span>
+            Prototyping, User research, Figma
+          </p>
+        </div>
+        <div
+          class="_entry_fa1ef7 _entryPlain_fa1ef7"
+          data-unit="experience:e3"
+        >
+          <div
+            class="_entryHead_fa1ef7"
+          >
+            <div
+              class="_entryMeta_fa1ef7"
+            >
+              <span
+                class="_metaDates_fa1ef7"
+              >
+                09/2015 – 05/2018
+              </span>
+              <span
+                class="_metaPlace_fa1ef7"
+              >
+                Rotterdam
+              </span>
+            </div>
+            <p
+              class="_columnTitle_fa1ef7"
+            >
+              <span
+                class="_entryTitle_fa1ef7"
+              >
+                UX Designer
+              </span>
+              <span
+                class="_entryAt_fa1ef7"
+              >
+                Studio Brik
+              </span>
+            </p>
+          </div>
+          <ul
+            class="_bullets_fa1ef7"
+          >
+            <li>
+              Delivered web projects for cultural institutions and municipalities
+            </li>
+          </ul>
+          <p
+            class="_entrySkills_fa1ef7"
+          >
+            <span
+              class="_accent_fa1ef7"
+            >
+              Skills · 
+            </span>
+            HTML & CSS, Interaction design
+          </p>
+        </div>
+      </section>
+      <section
+        class="_section_fa1ef7"
+      >
+        <h2
+          class="_sectionTitle_fa1ef7"
+        >
+          Projects
+        </h2>
+        <div
+          class="_entry_fa1ef7 _entryPlain_fa1ef7"
+          data-unit="project:p1"
+        >
+          <div
+            class="_entryHead_fa1ef7"
+          >
+            <div
+              class="_entryMeta_fa1ef7"
+            >
+              <span
+                class="_metaDates_fa1ef7"
+              >
+                01/2023 – Present
+              </span>
+            </div>
+            <p
+              class="_columnTitle_fa1ef7"
+            >
+              <span
+                class="_entryTitle_fa1ef7"
+              >
+                Tidewater design tokens
+              </span>
+              <span
+                class="_entryAt_fa1ef7"
+              >
+                <a
+                  class="_link_fa1ef7"
+                  href="https://github.com/janedoe/tidewater"
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <bdi
+                    dir="ltr"
+                  >
+                    github.com/janedoe/tidewater
+                  </bdi>
+                </a>
+              </span>
+            </p>
+          </div>
+          <ul
+            class="_bullets_fa1ef7"
+          >
+            <li>
+              Built an open-source Figma plugin that turns design tokens into CSS variables
+            </li>
+            <li>
+              Maintain it with two contributors; used by design teams at several logistics startups
+            </li>
+          </ul>
+          <p
+            class="_entrySkills_fa1ef7"
+          >
+            <span
+              class="_accent_fa1ef7"
+            >
+              Skills · 
+            </span>
+            Design systems, Figma, HTML & CSS
+          </p>
+        </div>
+      </section>
+      <section
+        class="_section_fa1ef7"
+      >
+        <h2
+          class="_sectionTitle_fa1ef7"
+        >
+          Education
+        </h2>
+        <div
+          class="_entry_fa1ef7"
+          data-unit="education:d1"
+        >
+          <div
+            class="_entryHead_fa1ef7"
+          >
+            <div
+              class="_entryMeta_fa1ef7"
+            >
+              <span
+                class="_metaDates_fa1ef7"
+              >
+                2013 – 2015
+              </span>
+            </div>
+            <p
+              class="_columnTitle_fa1ef7"
+            >
+              <span
+                class="_entryTitle_fa1ef7"
+              >
+                MSc Design for Interaction
+              </span>
+              <span
+                class="_entryAt_fa1ef7"
+              >
+                TU Delft
+              </span>
+            </p>
+          </div>
+          <ul
+            class="_bullets_fa1ef7"
+          >
+            <li>
+              Thesis on trust in automated scheduling tools
+            </li>
+          </ul>
+        </div>
+        <div
+          class="_entry_fa1ef7"
+          data-unit="education:d2"
+        >
+          <div
+            class="_entryHead_fa1ef7"
+          >
+            <div
+              class="_entryMeta_fa1ef7"
+            >
+              <span
+                class="_metaDates_fa1ef7"
+              >
+                2010 – 2013
+              </span>
+            </div>
+            <p
+              class="_columnTitle_fa1ef7"
+            >
+              <span
+                class="_entryTitle_fa1ef7"
+              >
+                BA Communication Design
+              </span>
+              <span
+                class="_entryAt_fa1ef7"
+              >
+                Willem de Kooning Academy
+              </span>
+            </p>
+          </div>
+        </div>
+      </section>
+      <section
+        class="_section_fa1ef7"
+      >
+        <h2
+          class="_sectionTitle_fa1ef7"
+        >
+          Certifications
+        </h2>
+        <div
+          class="_entry_fa1ef7"
+          data-unit="certification:c1"
+        >
+          <div
+            class="_entryHead_fa1ef7"
+          >
+            <div
+              class="_entryMeta_fa1ef7"
+            >
+              <span
+                class="_metaDates_fa1ef7"
+              >
+                06/2022
+              </span>
+            </div>
+            <p
+              class="_columnTitle_fa1ef7"
+            >
+              <span
+                class="_entryTitle_fa1ef7"
+              >
+                Certified Accessibility Specialist
+              </span>
+              <span
+                class="_entryAt_fa1ef7"
+              >
+                Inclusive Design Institute
+              </span>
+            </p>
+          </div>
+          <p
+            class="_muted_fa1ef7"
+          >
+            Valid until 06/2028
+             · 
+            Credential ID IDI-20481
+             · 
+            <a
+              class="_link_fa1ef7"
+              href="https://verify.example.org/IDI-20481"
+              rel="noreferrer"
+              target="_blank"
+            >
+              <bdi
+                dir="ltr"
+              >
+                verify.example.org/IDI-20481
+              </bdi>
+            </a>
+          </p>
+        </div>
+      </section>
+      <section
+        class="_section_fa1ef7"
+      >
+        <h2
+          class="_sectionTitle_fa1ef7"
+        >
+          Publications
+        </h2>
+        <div
+          class="_publication_fa1ef7"
+          data-unit="publication:u1"
+        >
+          <p>
+            <strong>
+              Doe, J.
+            </strong>
+            , & Vermeer, K. (2016). Trust in automated scheduling: A field study with dispatch planners. 
+            <em>
+              Proceedings of the Delft Design Conference
+            </em>
+            , 4, 112–121.
+             
+            <a
+              class="_link_fa1ef7"
+              href="https://doi.org/10.5555/12345678"
+              rel="noreferrer"
+              target="_blank"
+            >
+              <bdi
+                dir="ltr"
+              >
+                doi.org/10.5555/12345678
+              </bdi>
+            </a>
+          </p>
+        </div>
+      </section>
+      <section
+        class="_section_fa1ef7"
+      >
+        <h2
+          class="_sectionTitle_fa1ef7"
+        >
+          Skills
+        </h2>
+        <div
+          data-unit="skills"
+        >
+          <p
+            class="_skillLine_fa1ef7 _skillBare_fa1ef7"
+          >
+            Interaction design, Design systems, Prototyping, User research, Figma, HTML & CSS, Workshop facilitation
+          </p>
+        </div>
+      </section>
+      <section
+        class="_section_fa1ef7"
+      >
+        <h2
+          class="_sectionTitle_fa1ef7"
+        >
+          Languages
+        </h2>
+        <div
+          data-unit="languages"
+        >
+          <p
+            class="_skillLine_fa1ef7"
+          >
+            <strong
+              class="_skillLabel_fa1ef7"
+            >
+              Dutch
+            </strong>
+            <span
+              class="_skillItems_fa1ef7"
+            >
+              Native
+            </span>
+          </p>
+          <p
+            class="_skillLine_fa1ef7"
+          >
+            <strong
+              class="_skillLabel_fa1ef7"
+            >
+              English
+            </strong>
+            <span
+              class="_skillItems_fa1ef7"
+            >
+              Fluent (C2)
+            </span>
+          </p>
+          <p
+            class="_skillLine_fa1ef7"
+          >
+            <strong
+              class="_skillLabel_fa1ef7"
+            >
+              German
+            </strong>
+            <span
+              class="_skillItems_fa1ef7"
+            >
+              Intermediate (B1)
+            </span>
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
+</article>
+`;
+
+exports[`ResumeDocument > renders the demo profile in Ram 1`] = `
+<article
+  aria-label="Resume"
+  class="_page_fa1ef7 _twoColumn_fa1ef7 _centered_fa1ef7"
+  dir="ltr"
+  style="--page-height: 905; --paper-width: 210; --paper-height: 297; --pad-y: 30.48; --pad-x: 45.71; --gap: 15.96; --item-gap: 15.96; --font-size: 10.21; --line-height: 1.21; --head-font: var(--script-fonts), var(--typeface-greek-sans), var(--typeface-roboto); --body-font: var(--script-fonts), var(--typeface-greek-sans), var(--typeface-source-sans); --accent: #262f99; --name-size: 25; --name-weight: 600; --heading-size: 12; --heading-weight: 600; --heading-transform: none; --heading-tracking: 0; --heading-rule: 1; --heading-padding: 3; --sidebar-width: 150; --sidebar-gap: 28;"
+>
+  <header
+    class="_header_fa1ef7 _twoColumnHeader_fa1ef7"
+  >
+    <h1
+      class="_name_fa1ef7"
+    >
+      <span
+        class="_nameFirst_fa1ef7"
+      >
+        Jane
+      </span>
+       
+      <span
+        class="_nameLast_fa1ef7"
+      >
+        Doe
+      </span>
+    </h1>
+    <p
+      class="_headline_fa1ef7"
+    >
+      Senior Product Designer
+    </p>
+    <p
+      class="_address_fa1ef7"
+    >
+      <span
+        class="_contact_fa1ef7"
+      >
+        <svg
+          aria-hidden="true"
+          class="_icon_fa1ef7"
+          focusable="false"
+          viewBox="0 0 576 512"
+        >
+          <path
+            d="M288 -16C306 -16 320 -2 320 16V34C418 48 496 126 510 224H528C546 224 560 238 560 256C560 274 546 288 528 288H510C496 386 418 464 320 478V496C320 514 306 528 288 528C270 528 256 514 256 496V478C158 464 80 386 66 288H48C30 288 16 274 16 256C16 238 30 224 48 224H66C80 126 158 48 256 34V16C256 -2 270 -16 288 -16ZM128 256C128 344 200 416 288 416C376 416 448 344 448 256C448 168 376 96 288 96C200 96 128 168 128 256ZM288 160C341 160 384 203 384 256C384 309 341 352 288 352C235 352 192 309 192 256C192 203 235 160 288 160Z"
+          />
+        </svg>
+        <bdi
+          dir="ltr"
+        >
+          Westersingel 42, Rotterdam, Netherlands
+        </bdi>
+      </span>
+    </p>
+    <p
+      class="_contactLine_fa1ef7"
+    >
+      <span
+        class="_contact_fa1ef7"
+      >
+        <svg
+          aria-hidden="true"
+          class="_icon_fa1ef7"
+          focusable="false"
+          viewBox="0 0 448 512"
+        >
+          <path
+            d="M64 32C29 32 0 61 0 96V416C0 451 29 480 64 480H384C419 480 448 451 448 416V96C448 61 419 32 384 32H64ZM152 129C162 126 172 131 176 141L196 189C200 198 197 207 190 213L168 231C185 267 213 296 248 313L267 290C273 283 282 280 291 284L339 304C349 308 354 318 351 328L350 331C342 363 310 391 272 383C185 364 116 295 97 208C89 170 117 138 149 129H152Z"
+          />
+        </svg>
+        <bdi
+          dir="ltr"
+        >
+          +31 6 1234 5678
+        </bdi>
+      </span>
+      <span
+        aria-hidden="true"
+        class="_bar_fa1ef7"
+      >
+        |
+      </span>
+      <span
+        class="_contact_fa1ef7"
+      >
+        <svg
+          aria-hidden="true"
+          class="_icon_fa1ef7"
+          focusable="false"
+          viewBox="0 0 512 512"
+        >
+          <path
+            d="M61 64C28 64 0 92 0 125C0 126 0 127 0 128V384C0 419 29 448 64 448H448C483 448 512 419 512 384V128C512 127 512 126 512 125C512 92 485 64 451 64H61ZM464 192V384C464 393 457 400 448 400H64C55 400 48 393 48 384V192L203 310C234 334 278 334 309 310L464 192ZM48 125C48 118 54 112 61 112H451C458 112 464 118 464 125C464 130 462 134 459 136L280 272C266 282 246 282 232 272L53 136C50 134 48 130 48 125Z"
+          />
+        </svg>
+        <a
+          class="_contactLink_fa1ef7"
+          href="mailto:jane.doe@example.com"
+          rel="noreferrer"
+          target="_blank"
+        >
+          <bdi
+            dir="ltr"
+          >
+            jane.doe@example.com
+          </bdi>
+        </a>
+      </span>
+      <span
+        aria-hidden="true"
+        class="_bar_fa1ef7"
+      >
+        |
+      </span>
+      <span
+        class="_contact_fa1ef7"
+      >
+        <svg
+          aria-hidden="true"
+          class="_icon_fa1ef7"
+          focusable="false"
+          viewBox="0 0 512 512"
+        >
+          <path
+            d="M352 280H161C164 345 178 404 199 447C210 472 222 489 234 500C245 510 253 512 257 512C261 512 268 510 279 500C291 489 303 472 315 447C335 404 349 345 352 280ZM161 232H352C349 168 335 108 314 65C303 40 291 23 279 12C268 2 260 0 256 0C252 0 245 2 234 12C222 23 210 40 198 65C178 108 164 168 161 232ZM113 232C116 146 139 67 171 15C79 47 11 131 2 232H113ZM2 280C11 381 79 465 171 497C139 445 116 366 113 280H2ZM400 280C396 366 374 445 342 497C434 465 502 381 511 280H400ZM511 232C502 131 434 47 342 15C374 67 396 146 400 232H511Z"
+          />
+        </svg>
+        <a
+          class="_contactLink_fa1ef7"
+          href="https://example.com/"
+          rel="noreferrer"
+          target="_blank"
+        >
+          <bdi
+            dir="ltr"
+          >
+            example.com
+          </bdi>
+        </a>
+      </span>
+      <span
+        aria-hidden="true"
+        class="_bar_fa1ef7"
+      >
+        |
+      </span>
+      <span
+        class="_contact_fa1ef7"
+      >
+        <svg
+          aria-hidden="true"
+          class="_icon_fa1ef7"
+          focusable="false"
+          viewBox="0 0 448 512"
+        >
+          <path
+            d="M416 32H32C14 32 0 47 0 64V448C0 466 14 480 32 480H416C434 480 448 466 448 448V64C448 47 434 32 416 32ZM135 416H69V202H136V416H135ZM102 96C123 96 141 113 141 135C141 156 123 173 102 173C81 173 64 156 64 135C64 113 81 96 102 96ZM384 416H318V312C318 287 317 255 283 255C249 255 244 282 244 310V416H177V202H241V231H242C251 215 272 197 305 197C372 197 384 241 384 299V416Z"
+          />
+        </svg>
+        <a
+          class="_contactLink_fa1ef7"
+          href="https://linkedin.com/in/janedoe-example"
+          rel="noreferrer"
+          target="_blank"
+        >
+          <bdi
+            dir="ltr"
+          >
+            Jane Doe
+          </bdi>
+        </a>
+      </span>
+    </p>
+  </header>
+  <div
+    class="_columns_fa1ef7"
+  >
+    <div
+      class="_column_fa1ef7"
+    >
+      <section
+        class="_section_fa1ef7"
+      >
+        <h2
+          class="_sectionTitle_fa1ef7"
+        >
+          Profile
+        </h2>
+        <div
+          data-unit="summary"
+        >
+          <p
+            class="_summary_fa1ef7"
+          >
+            Product designer with nine years of experience turning complicated operational tools into calm, usable software. I like working close to engineering and closer to the people who use what we build.
+          </p>
+        </div>
+      </section>
+      <section
+        class="_section_fa1ef7"
+      >
+        <h2
+          class="_sectionTitle_fa1ef7"
+        >
+          Experience
+        </h2>
+        <div
+          class="_entry_fa1ef7"
+          data-unit="experience:e1"
+        >
+          <div
+            class="_entryHead_fa1ef7"
+          >
+            <div
+              class="_entryMeta_fa1ef7"
+            >
+              <span
+                class="_metaDates_fa1ef7"
+              >
+                03/2021 – Present
+              </span>
+              <span
+                class="_metaPlace_fa1ef7"
+              >
+                Rotterdam
+              </span>
+            </div>
+            <p
+              class="_columnTitle_fa1ef7"
+            >
+              <span
+                class="_entryTitle_fa1ef7"
+              >
+                Senior Product Designer
+              </span>
+              <span
+                class="_entryAt_fa1ef7"
+              >
+                Northwind Logistics
+              </span>
+            </p>
+          </div>
+          <p
+            class="_descriptor_fa1ef7"
+          >
+            Freight platform for European carriers, 300 people
+          </p>
+          <ul
+            class="_bullets_fa1ef7"
+          >
+            <li>
+              Led the redesign of the carrier portal used daily by 4,000+ dispatchers
+            </li>
+            <li>
+              Built and maintained the design system across six product teams
+            </li>
+            <li>
+              Mentored three junior designers through their first year
+            </li>
+          </ul>
+          <p
+            class="_entrySkills_fa1ef7"
+          >
+            <span
+              class="_accent_fa1ef7"
+            >
+              Skills · 
+            </span>
+            Interaction design, Design systems, User research, Workshop facilitation
+          </p>
+        </div>
+        <div
+          class="_entry_fa1ef7"
+          data-unit="experience:e2"
+        >
+          <div
+            class="_entryHead_fa1ef7"
+          >
+            <div
+              class="_entryMeta_fa1ef7"
+            >
+              <span
+                class="_metaDates_fa1ef7"
+              >
+                06/2018 – 02/2021
+              </span>
+              <span
+                class="_metaPlace_fa1ef7"
+              >
+                Amsterdam
+              </span>
+            </div>
+            <p
+              class="_columnTitle_fa1ef7"
+            >
+              <span
+                class="_entryTitle_fa1ef7"
+              >
+                Product Designer
+              </span>
+              <span
+                class="_entryAt_fa1ef7"
+              >
+                Fieldnote
+              </span>
+            </p>
+          </div>
+          <p
+            class="_descriptor_fa1ef7"
+          >
+            Note-taking app for field researchers
+          </p>
+          <ul
+            class="_bullets_fa1ef7"
+          >
+            <li>
+              Designed the mobile note-taking app from first prototype to 120k users
+            </li>
+            <li>
+              Ran monthly research sessions with field researchers
+            </li>
+          </ul>
+          <p
+            class="_entrySkills_fa1ef7"
+          >
+            <span
+              class="_accent_fa1ef7"
+            >
+              Skills · 
+            </span>
+            Prototyping, User research, Figma
+          </p>
+        </div>
+        <div
+          class="_entry_fa1ef7"
+          data-unit="experience:e3"
+        >
+          <div
+            class="_entryHead_fa1ef7"
+          >
+            <div
+              class="_entryMeta_fa1ef7"
+            >
+              <span
+                class="_metaDates_fa1ef7"
+              >
+                09/2015 – 05/2018
+              </span>
+              <span
+                class="_metaPlace_fa1ef7"
+              >
+                Rotterdam
+              </span>
+            </div>
+            <p
+              class="_columnTitle_fa1ef7"
+            >
+              <span
+                class="_entryTitle_fa1ef7"
+              >
+                UX Designer
+              </span>
+              <span
+                class="_entryAt_fa1ef7"
+              >
+                Studio Brik
+              </span>
+            </p>
+          </div>
+          <ul
+            class="_bullets_fa1ef7"
+          >
+            <li>
+              Delivered web projects for cultural institutions and municipalities
+            </li>
+          </ul>
+          <p
+            class="_entrySkills_fa1ef7"
+          >
+            <span
+              class="_accent_fa1ef7"
+            >
+              Skills · 
+            </span>
+            HTML & CSS, Interaction design
+          </p>
+        </div>
+      </section>
+      <section
+        class="_section_fa1ef7"
+      >
+        <h2
+          class="_sectionTitle_fa1ef7"
+        >
+          Projects
+        </h2>
+        <div
+          class="_entry_fa1ef7"
+          data-unit="project:p1"
+        >
+          <div
+            class="_entryHead_fa1ef7"
+          >
+            <div
+              class="_entryMeta_fa1ef7"
+            >
+              <span
+                class="_metaDates_fa1ef7"
+              >
+                01/2023 – Present
+              </span>
+            </div>
+            <p
+              class="_columnTitle_fa1ef7"
+            >
+              <span
+                class="_entryTitle_fa1ef7"
+              >
+                Tidewater design tokens
+              </span>
+              <span
+                class="_entryAt_fa1ef7"
+              >
+                <a
+                  class="_link_fa1ef7"
+                  href="https://github.com/janedoe/tidewater"
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <bdi
+                    dir="ltr"
+                  >
+                    github.com/janedoe/tidewater
+                  </bdi>
+                </a>
+              </span>
+            </p>
+          </div>
+          <ul
+            class="_bullets_fa1ef7"
+          >
+            <li>
+              Built an open-source Figma plugin that turns design tokens into CSS variables
+            </li>
+            <li>
+              Maintain it with two contributors; used by design teams at several logistics startups
+            </li>
+          </ul>
+          <p
+            class="_entrySkills_fa1ef7"
+          >
+            <span
+              class="_accent_fa1ef7"
+            >
+              Skills · 
+            </span>
+            Design systems, Figma, HTML & CSS
+          </p>
+        </div>
+      </section>
+      <section
+        class="_section_fa1ef7"
+      >
+        <h2
+          class="_sectionTitle_fa1ef7"
+        >
+          Education
+        </h2>
+        <div
+          class="_entry_fa1ef7 _entryPlain_fa1ef7"
+          data-unit="education:d1"
+        >
+          <div
+            class="_entryHead_fa1ef7"
+          >
+            <div
+              class="_entryMeta_fa1ef7"
+            >
+              <span
+                class="_metaDates_fa1ef7"
+              >
+                2013 – 2015
+              </span>
+            </div>
+            <p
+              class="_columnTitle_fa1ef7"
+            >
+              <span
+                class="_entryTitle_fa1ef7"
+              >
+                MSc Design for Interaction
+              </span>
+              <span
+                class="_entryAt_fa1ef7"
+              >
+                TU Delft
+              </span>
+            </p>
+          </div>
+          <ul
+            class="_bullets_fa1ef7"
+          >
+            <li>
+              Thesis on trust in automated scheduling tools
+            </li>
+          </ul>
+        </div>
+        <div
+          class="_entry_fa1ef7 _entryPlain_fa1ef7"
+          data-unit="education:d2"
+        >
+          <div
+            class="_entryHead_fa1ef7"
+          >
+            <div
+              class="_entryMeta_fa1ef7"
+            >
+              <span
+                class="_metaDates_fa1ef7"
+              >
+                2010 – 2013
+              </span>
+            </div>
+            <p
+              class="_columnTitle_fa1ef7"
+            >
+              <span
+                class="_entryTitle_fa1ef7"
+              >
+                BA Communication Design
+              </span>
+              <span
+                class="_entryAt_fa1ef7"
+              >
+                Willem de Kooning Academy
+              </span>
+            </p>
+          </div>
+        </div>
+      </section>
+      <section
+        class="_section_fa1ef7"
+      >
+        <h2
+          class="_sectionTitle_fa1ef7"
+        >
+          Certifications
+        </h2>
+        <div
+          class="_entry_fa1ef7 _entryPlain_fa1ef7"
+          data-unit="certification:c1"
+        >
+          <div
+            class="_entryHead_fa1ef7"
+          >
+            <div
+              class="_entryMeta_fa1ef7"
+            >
+              <span
+                class="_metaDates_fa1ef7"
+              >
+                06/2022
+              </span>
+            </div>
+            <p
+              class="_columnTitle_fa1ef7"
+            >
+              <span
+                class="_entryTitle_fa1ef7"
+              >
+                Certified Accessibility Specialist
+              </span>
+              <span
+                class="_entryAt_fa1ef7"
+              >
+                Inclusive Design Institute
+              </span>
+            </p>
+          </div>
+          <p
+            class="_muted_fa1ef7"
+          >
+            Valid until 06/2028
+             · 
+            Credential ID IDI-20481
+             · 
+            <a
+              class="_link_fa1ef7"
+              href="https://verify.example.org/IDI-20481"
+              rel="noreferrer"
+              target="_blank"
+            >
+              <bdi
+                dir="ltr"
+              >
+                verify.example.org/IDI-20481
+              </bdi>
+            </a>
+          </p>
+        </div>
+      </section>
+      <section
+        class="_section_fa1ef7"
+      >
+        <h2
+          class="_sectionTitle_fa1ef7"
+        >
+          Publications
+        </h2>
+        <div
+          class="_publication_fa1ef7"
+          data-unit="publication:u1"
+        >
+          <p>
+            <strong>
+              Doe, J.
+            </strong>
+            , & Vermeer, K. (2016). Trust in automated scheduling: A field study with dispatch planners. 
+            <em>
+              Proceedings of the Delft Design Conference
+            </em>
+            , 4, 112–121.
+             
+            <a
+              class="_link_fa1ef7"
+              href="https://doi.org/10.5555/12345678"
+              rel="noreferrer"
+              target="_blank"
+            >
+              <bdi
+                dir="ltr"
+              >
+                doi.org/10.5555/12345678
+              </bdi>
+            </a>
+          </p>
+        </div>
+      </section>
+      <section
+        class="_section_fa1ef7"
+      >
+        <h2
+          class="_sectionTitle_fa1ef7"
+        >
+          Skills
+        </h2>
+        <div
+          data-unit="skills"
+        >
+          <p
+            class="_skillLine_fa1ef7 _skillBare_fa1ef7"
+          >
+            Interaction design, Design systems, Prototyping, User research, Figma, HTML & CSS, Workshop facilitation
+          </p>
+        </div>
+      </section>
+      <section
+        class="_section_fa1ef7"
+      >
+        <h2
+          class="_sectionTitle_fa1ef7"
+        >
+          Languages
+        </h2>
+        <div
+          data-unit="languages"
+        >
+          <p
+            class="_skillLine_fa1ef7"
+          >
+            <strong
+              class="_skillLabel_fa1ef7"
+            >
+              Dutch
+            </strong>
+            <span
+              class="_skillItems_fa1ef7"
+            >
+              Native
+            </span>
+          </p>
+          <p
+            class="_skillLine_fa1ef7"
+          >
+            <strong
+              class="_skillLabel_fa1ef7"
+            >
+              English
+            </strong>
+            <span
+              class="_skillItems_fa1ef7"
+            >
+              Fluent (C2)
+            </span>
+          </p>
+          <p
+            class="_skillLine_fa1ef7"
+          >
+            <strong
+              class="_skillLabel_fa1ef7"
+            >
+              German
+            </strong>
+            <span
+              class="_skillItems_fa1ef7"
+            >
+              Intermediate (B1)
+            </span>
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
+</article>
+`;
+
 exports[`ResumeDocument > renders the demo profile in Signal 1`] = `
 <article
   aria-label="Resume"

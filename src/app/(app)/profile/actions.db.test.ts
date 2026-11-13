@@ -25,7 +25,7 @@ afterAll(() => prisma().$disconnect());
 
 const basics = {
   name: "Jane Doe", headline: "", email: "", phone: "", dob: "1992-04-18", website: "",
-  address: "", city: "", country: "", linkedin: "", summary: "", showAge: true,
+  address: "", city: "", country: "", linkedin: "", license: "", residence: "", summary: "", showAge: true, showDob: false,
 };
 
 describe("profile actions", () => {
@@ -41,6 +41,26 @@ describe("profile actions", () => {
 
     await saveBasics({ ...basics, dob: "", showAge: false });
     expect(await fields()).toEqual([{ key: "name", value: "Jane Doe" }]);
+  });
+
+  it("saves a driving licence, a residence status and the date-of-birth switch like the other basics", async () => {
+    const fields = () => prisma().profileField.findMany({ select: { key: true, value: true }, orderBy: { key: "asc" } });
+    const personal = { ...basics, showAge: false, license: "Class B", residence: "Permanent residence", showDob: true };
+    await expect(saveBasics(personal)).resolves.toEqual({ ok: true, data: null });
+    expect(await fields()).toEqual([
+      { key: "dob", value: "1992-04-18" },
+      { key: "license", value: "Class B" },
+      { key: "name", value: "Jane Doe" },
+      { key: "residence", value: "Permanent residence" },
+      { key: "showDob", value: "true" },
+    ]);
+    expect((await loadProfile()).basics).toEqual(personal);
+
+    await saveBasics({ ...personal, license: "", residence: "", showDob: false });
+    expect(await fields()).toEqual([
+      { key: "dob", value: "1992-04-18" },
+      { key: "name", value: "Jane Doe" },
+    ]);
   });
 
   it("adds skills in order and ignores duplicates in any case", async () => {

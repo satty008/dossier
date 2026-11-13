@@ -472,3 +472,263 @@ describe("ResumeDocument's custom sections (#298)", () => {
     expect(lines.indexOf("Awards")).toBeGreaterThan(lines.indexOf("Profile"));
   });
 });
+
+describe("the two-column layouts", () => {
+  const png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+  const grouped = {
+    ...profile,
+    basics: { ...profile.basics, showAge: true },
+    skills: profile.skills.map((skill) => ({ ...skill, group: ["Figma", "Prototyping"].includes(skill.name) ? "Tools" : "Design" })),
+    photo: { src: png, onResumes: true },
+  };
+  const draw = (extra: Partial<Parameters<typeof ResumeDocument>[0]> = {}) =>
+    render(<ResumeDocument theme={theme("default-ram")} profile={grouped} paper="A4" today={today} {...extra} />);
+
+  it("marks the page, and keeps the sections in their order", () => {
+    draw();
+    expect(screen.getByRole("article", { name: "Resume" }).className).toMatch(/twoColumn/);
+    expect(sectionTitles()).toEqual(["Profile", "Experience", "Projects", "Education", "Certifications", "Publications", "Skills", "Languages"]);
+  });
+
+  it("sets the first names thin and the last name bold, the headline under it, and the place on a line of its own", () => {
+    draw();
+    const name = screen.getByRole("heading", { level: 1 });
+    expect(name).toHaveTextContent("Jane Doe");
+    expect(within(name).getByText("Jane").className).toMatch(/nameFirst/);
+    expect(within(name).getByText("Doe").className).toMatch(/nameLast/);
+    expect(name.nextElementSibling).toHaveTextContent("Senior Product Designer");
+    // The street address, with the city and country: what the template's address line holds.
+    const place = screen.getByText("Westersingel 42, Rotterdam, Netherlands").closest("p")!;
+    expect(place.className).toMatch(/address/);
+    expect(place.querySelector("svg")).not.toBeNull();
+    expect(screen.getByText("+31 6 1234 5678").closest("p")!.textContent).not.toContain("Rotterdam");
+  });
+
+  it("lists the other contact details as the template does, each with an icon and a bar between them, and links that open", () => {
+    draw();
+    const line = screen.getByText("+31 6 1234 5678").closest("p")!;
+    expect(line.className).toMatch(/contactLine/);
+    // The template prints the person's name for their LinkedIn, which still opens it.
+    expect(line.textContent).toBe("Age 34|+31 6 1234 5678|jane.doe@example.com|example.com|Jane Doe");
+    expect(line.querySelectorAll("svg")).toHaveLength(5);
+    expect(within(line).getByRole("link", { name: "jane.doe@example.com" })).toHaveAttribute("href", "mailto:jane.doe@example.com");
+    expect(within(line).getByRole("link", { name: "Jane Doe" })).toHaveAttribute("href", "https://linkedin.com/in/janedoe-example");
+    expect(within(line).getByRole("link", { name: "example.com" })).toHaveAttribute("href", "https://example.com/");
+  });
+
+  it("gives a link to GitHub its logo and just the handle, and any other website the globe and its address", () => {
+    const icon = (website: string, shown: string) => {
+      const { unmount } = draw({ profile: { ...grouped, basics: { ...grouped.basics, website } } });
+      const paths = [...screen.getByText(shown).closest("span")!.querySelectorAll("path")].map((path) => path.getAttribute("d"));
+      unmount();
+      return paths[0];
+    };
+    expect(icon("https://github.com/janedoe", "janedoe")).not.toBe(icon("https://example.com", "example.com"));
+    expect(icon("https://example.com", "example.com")).toBe(icon("https://example.org", "example.org"));
+    draw({ profile: { ...grouped, basics: { ...grouped.basics, website: "https://github.com/janedoe" } } });
+    expect(screen.getByRole("link", { name: "janedoe" })).toHaveAttribute("href", "https://github.com/janedoe");
+  });
+
+  it("shows a GitHub link that has no handle as it is", () => {
+    draw({ profile: { ...grouped, basics: { ...grouped.basics, website: "https://github.com" } } });
+    expect(screen.getByRole("link", { name: "github.com" })).toHaveAttribute("href", "https://github.com/");
+  });
+
+  it("puts the photo in the corner, under its alt text, and only when there is one", () => {
+    const { unmount } = draw();
+    const photo = screen.getByRole("img", { name: "Jane Doe" });
+    expect(photo).toHaveAttribute("src", png);
+    expect(photo.className).toMatch(/photoCorner/);
+    expect(photo.parentElement!.tagName).toBe("HEADER");
+    expect(photo.parentElement!.className).toMatch(/headerWithCorner/);
+    unmount();
+    draw({ profile: { ...grouped, photo: null } });
+    expect(screen.queryByRole("img")).toBeNull();
+    expect(document.querySelector("header")!.className).not.toMatch(/headerWithCorner/);
+  });
+
+  it("puts a role's dates and place in the column before its title, with the company under it", () => {
+    draw();
+    const role = document.querySelector<HTMLElement>("[data-unit='experience:e1']")!;
+    const meta = role.querySelector("[class*=entryMeta]")!;
+    // The months are digits, as the template writes them, so the dates fit their column.
+    expect(meta).toHaveTextContent("03/2021 – PresentRotterdam");
+    expect(within(meta as HTMLElement).getByText("Rotterdam").className).toMatch(/metaPlace/);
+    const title = within(role).getByText("Senior Product Designer");
+    expect(title.nextElementSibling).toHaveTextContent("Northwind Logistics");
+    expect(meta.nextElementSibling).toContainElement(title);
+    // The title line is first, then the line about the company, then the points, then the skills.
+    expect(role.querySelector("p[class*=descriptor]")).toHaveTextContent("Freight platform for European carriers, 300 people");
+    expect(role.querySelectorAll("li")).toHaveLength(3);
+    expect(role).toHaveTextContent("Skills · Interaction design, Design systems, User research, Workshop facilitation");
+  });
+
+  it("draws every kind of entry the same way: projects, education and certifications, without a place when they have none", () => {
+    draw();
+    const education = screen.getByText("MSc Design for Interaction").closest("[data-unit]")!;
+    expect(education.querySelector("[class*=entryMeta]")).toHaveTextContent(/^2013 – 2015$/);
+    expect(screen.getByText("MSc Design for Interaction").nextElementSibling).toHaveTextContent("TU Delft");
+    // Its notes are bullets, a line to each, as the template's resume-item has them.
+    expect(within(education as HTMLElement).getByText("Thesis on trust in automated scheduling tools").tagName).toBe("LI");
+    const project = screen.getByText("Tidewater design tokens").closest("[data-unit]")!;
+    expect(project.querySelector("[class*=entryMeta]")).toHaveTextContent(/^01\/2023 – Present$/);
+    expect(within(project as HTMLElement).getByRole("link", { name: "github.com/janedoe/tidewater" })).toBeInTheDocument();
+    const certification = screen.getByText("Certified Accessibility Specialist").closest("[data-unit]")!;
+    expect(certification.querySelector("[class*=entryMeta]")).toHaveTextContent(/^06\/2022$/);
+  });
+
+  it("marks education, certifications and custom entries as the template's plain entries, but not roles and projects", () => {
+    draw();
+    const plain = (id: string) => document.querySelector(`[data-unit='${id}']`)!.className;
+    for (const id of ["education:d1", "certification:c1"]) expect(plain(id), id).toMatch(/entryPlain/);
+    for (const id of ["experience:e1", "project:p1"]) expect(plain(id), id).not.toMatch(/entryPlain/);
+    // Another theme has no use for the mark.
+    const { container } = render(<ResumeDocument theme={theme("chronicle")} profile={grouped} paper="A4" today={today} />);
+    expect(container.innerHTML).not.toMatch(/entryPlain/);
+  });
+
+  it("leaves the column out of an entry with no dates and no place", () => {
+    const { container } = draw({ profile: { ...grouped, experience: grouped.experience.map((entry) => ({ ...entry, location: "", startYear: null, startMonth: null, endYear: null, endMonth: null, current: false })) } });
+    expect(container.querySelector("[data-unit='experience:e1'] [class*=entryMeta]")).toBeNull();
+    expect(container.querySelector("[data-unit='education:d1'] [class*=entryMeta]")).not.toBeNull();
+  });
+
+  it("sets skills in rows of the group's name and its skills with commas, and a line without a group across the row", () => {
+    const { unmount } = draw();
+    const rows = [...document.querySelectorAll('[data-unit="skills"] p')];
+    expect(rows.map((row) => row.textContent)).toEqual(["DesignInteraction design, Design systems, User research, HTML & CSS, Workshop facilitation", "ToolsPrototyping, Figma"]);
+    expect(within(rows[1] as HTMLElement).getByText("Tools", { selector: "strong" })).toBeInTheDocument();
+    unmount();
+    draw({ profile: { ...grouped, skills: profile.skills.map((skill) => ({ ...skill, group: "" })) } });
+    const bare = document.querySelector('[data-unit="skills"] p')!;
+    expect(bare.className).toMatch(/skillBare/);
+    expect(bare.querySelector("strong")).toBeNull();
+    expect(bare).toHaveTextContent("Interaction design, Design systems, Prototyping, User research, Figma, HTML & CSS, Workshop facilitation");
+  });
+
+  it("sets each language in a row of its own", () => {
+    draw();
+    const rows = [...document.querySelectorAll('[data-unit="languages"] p')];
+    expect(rows.map((row) => row.textContent)).toEqual(["DutchNative", "EnglishFluent (C2)", "GermanIntermediate (B1)"]);
+  });
+
+  it("draws a tailored resume the same way, from its units", () => {
+    draw({ units: demoResumeUnits(), profile: { ...grouped, photo: null } });
+    const role = document.querySelector("[data-unit='experience:e1']")!;
+    expect(role.querySelector("[class*=entryMeta]")).toHaveTextContent("03/2021 – PresentRotterdam");
+    expect(screen.getByText(/a dense, high-stakes workflow$/)).toBeInTheDocument();
+  });
+
+  it("draws the units it's given with the renderer it's given", () => {
+    draw({
+      units: demoResumeUnits(),
+      renderUnit: ({ id, className, head, children }) => (
+        <section className={className} data-testid={id}>
+          {head}
+          {children}
+        </section>
+      ),
+    });
+    expect(screen.getByTestId("experience:e3")).toHaveTextContent(/^09\/2015 – 05\/2018RotterdamUX DesignerStudio Brik/);
+  });
+
+  it("is the same in a language of its own", () => {
+    draw({ language: "German" });
+    expect(sectionTitles()).toEqual(["Profil", "Berufserfahrung", "Projekte", "Ausbildung", "Zertifizierungen", "Publikationen", "Kenntnisse", "Sprachen"]);
+    // German writes its dates with dots, not slashes.
+    expect(screen.getByText("03.2021 – Heute")).toBeInTheDocument();
+    expect(screen.getByText("34 Jahre")).toBeInTheDocument();
+  });
+
+  describe("the personal details", () => {
+    const personal = { dob: "1989-11-08", showDob: true, license: "Class B", residence: "Permanent residence" };
+    const withPersonal = (extra: Partial<typeof personal> = {}) => ({ ...grouped, basics: { ...grouped.basics, ...personal, ...extra } });
+    const line = () => document.querySelector<HTMLElement>("p[class*=personalLine]");
+
+    it("lists them under the contacts in small print, with a bar between them", () => {
+      draw({ profile: withPersonal() });
+      expect(line()!.textContent).toBe("Date of birth: Nov 8, 1989|Driving licence: Class B|Residence status: Permanent residence");
+      expect(line()!.previousElementSibling).toBe(screen.getByText("+31 6 1234 5678").closest("p"));
+      // The bars are only for the eye.
+      expect([...line()!.querySelectorAll("[aria-hidden]")].map((bar) => bar.textContent)).toEqual(["|", "|"]);
+    });
+
+    it("writes them in the document's language, the date the way its readers do", () => {
+      draw({ profile: withPersonal(), language: "German" });
+      expect(line()!.textContent).toBe("Geburtsdatum: 08.11.1989|Führerschein: Class B|Aufenthaltsstatus: Permanent residence");
+    });
+
+    it("leaves out what isn't filled in, and the date of birth unless it's shown", () => {
+      draw({ profile: withPersonal({ showDob: false, residence: "" }) });
+      expect(line()!.textContent).toBe("Driving licence: Class B");
+    });
+
+    it("has no line without any", () => {
+      draw({ profile: withPersonal({ showDob: false, license: "", residence: "" }) });
+      expect(line()).toBeNull();
+      expect(document.querySelector("header")!.textContent).not.toContain("Date of birth");
+    });
+
+    it("is in the contact details of the other layouts, which have no such line", () => {
+      render(<ResumeDocument theme={theme("editorial")} profile={withPersonal()} paper="A4" today={today} />);
+      expect(screen.getByText("jane.doe@example.com").closest("p")?.textContent).toBe(
+        "jane.doe@example.com  ·  +31 6 1234 5678  ·  Rotterdam, Netherlands  ·  example.com  ·  linkedin.com/in/janedoe-example  ·  Age 36  ·  Date of birth: Nov 8, 1989  ·  Driving licence: Class B  ·  Residence status: Permanent residence",
+      );
+      expect(line()).toBeNull();
+    });
+
+    it("is in the sidebar's contact list in a sidebar layout", () => {
+      render(<ResumeDocument theme={theme("modern")} profile={withPersonal()} paper="A4" today={today} />);
+      const contact = screen.getByRole("heading", { name: "Contact" }).parentElement!;
+      expect(within(contact).getAllByRole("listitem").map((item) => item.textContent)).toContain("Driving licence: Class B");
+    });
+  });
+});
+
+describe("Priya's two-column layout", () => {
+  const png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+  const personal = { dob: "1989-11-08", showDob: true, license: "Class B", residence: "Permanent residence" };
+  const priya = { ...profile, basics: { ...profile.basics, ...personal }, photo: { src: png, onResumes: true } };
+  const draw = (extra: Partial<Parameters<typeof ResumeDocument>[0]> = {}) =>
+    render(<ResumeDocument theme={theme("default-priya")} profile={priya} paper="A4" today={today} {...extra} />);
+  const unit = (id: string) => document.querySelector<HTMLElement>(`[data-unit='${id}']`)!;
+
+  it("is a two-column page of its own: marked as both, with the same sections", () => {
+    draw();
+    const page = screen.getByRole("article", { name: "Resume" });
+    expect(page.className).toMatch(/twoColumn_/);
+    expect(page.className).toMatch(/twoColumnCompact/);
+    expect(sectionTitles()).toEqual(["Profile", "Experience", "Projects", "Education", "Certifications", "Publications", "Skills", "Languages"]);
+    // Ram's has the first mark only.
+    const { container } = render(<ResumeDocument theme={theme("default-ram")} profile={priya} paper="A4" today={today} />);
+    expect(container.innerHTML).not.toMatch(/twoColumnCompact/);
+  });
+
+  it("draws roles and projects as compact entries, and education and certifications as the roomy ones: Ram's the other way round", () => {
+    draw();
+    for (const id of ["experience:e1", "project:p1"]) expect(unit(id).className, id).toMatch(/entryPlain/);
+    for (const id of ["education:d1", "certification:c1"]) expect(unit(id).className, id).not.toMatch(/entryPlain/);
+    // They still have the dates and place in a column before the title.
+    expect(unit("experience:e1").querySelector("[class*=entryMeta]")).toHaveTextContent("03/2021 – PresentRotterdam");
+    expect(unit("education:d1").querySelector("[class*=entryMeta]")).toHaveTextContent(/^2013 – 2015$/);
+  });
+
+  it("follows the place with the residence status, as the template does, and keeps the rest on the line below the contacts", () => {
+    draw();
+    const place = screen.getByText(/Westersingel 42, Rotterdam, Netherlands/).closest("p")!;
+    expect(place.className).toMatch(/address/);
+    expect(place.textContent).toBe("Westersingel 42, Rotterdam, Netherlands · Permanent residence");
+    expect(document.querySelector("p[class*=personalLine]")!.textContent).toBe("Date of birth: Nov 8, 1989|Driving licence: Class B");
+  });
+
+  it("has no line below the contacts when only the residence status is filled in", () => {
+    draw({ profile: { ...priya, basics: { ...priya.basics, showDob: false, license: "" } } });
+    expect(document.querySelector("p[class*=personalLine]")).toBeNull();
+    expect(screen.getByText(/Permanent residence/).closest("p")!.className).toMatch(/address/);
+  });
+
+  it("has the photo in the corner like the other, for the print styles to raise", () => {
+    draw();
+    expect(screen.getByRole("img", { name: "Jane Doe" }).className).toMatch(/photoCorner/);
+  });
+});

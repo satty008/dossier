@@ -13,6 +13,7 @@ import { PHOTO_SHAPES, resolveTheme, type ThemeData } from "@/lib/themes";
 
 import { Contact, ContactDetail, ContactLine, DocumentPage, DocumentSection, plainUnit, type UnitRenderer } from "./document-page";
 import styles from "./document.module.css";
+import { ColumnEntryHead, CornerPhoto, SkillRows, TwoColumnHeader } from "./two-column";
 
 type ResumeDocumentProps = ResumeOptions & {
   theme: ThemeData;
@@ -29,6 +30,13 @@ type ResumeDocumentProps = ResumeOptions & {
   /** How far the spacing and type are squeezed to fit one page (public issue 69); 0 for the theme as it is. */
   fit?: number;
 };
+
+/** An education entry's notes, a line to a bullet. */
+const noteLines = (notes: string) =>
+  notes
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
 
 /** Enough of a resume's own words to tell its script and direction. */
 const sampleText = (content: ResumeContent) =>
@@ -52,9 +60,17 @@ const sampleText = (content: ResumeContent) =>
 export function ResumeDocument({ theme, profile, paper, layout, sections = DEFAULT_SECTION_LAYOUT, language, renderUnit = plainUnit, fit = 0, ...options }: ResumeDocumentProps) {
   const resolved = resolveTheme(theme, layout, fit);
   const labels = documentLabels(language);
-  const content = resumeContent(profile, options, labels);
+  // The two-column layouts write dates as digits, as their templates do and as the language does: "03/2021 – 08/2026", with dots in German ("03.2021 – 08.2026"), which fits the column beside an entry.
+  const content = resumeContent(profile, { ...options, numericDates: resolved.columns }, labels);
   const { lang, dir } = documentLanguage(language, sampleText(content));
   const { shape, position } = resolved.photo;
+  const twoColumn = resolved.columns;
+  // Ram's two-column layout draws roles in blocks of their own and education, certifications and your own sections compactly; Priya's
+  // draws roles compactly and education and certifications in blocks of their own (your own sections stay compact).
+  const rolesCompact = resolved.compactRoles;
+  const othersCompact = twoColumn && !rolesCompact;
+  // Priya's layout puts the residence status after the place, as her template does; Ram's lists it with the other personal details.
+  const residenceStatus = content.personal.find(({ kind }) => kind === "residence")?.value ?? "";
   const photo = (size: "header" | "sidebar", className?: string) =>
     content.photo && <ResumePhoto key="photo" src={content.photo} name={content.name} shape={shape} size={size} className={className} />;
   // A role, paid or volunteering (#294).
@@ -62,8 +78,8 @@ export function ResumeDocument({ theme, profile, paper, layout, sections = DEFAU
     <Fragment key={entry.id}>
       {renderUnit({
         id: `experience:${entry.id}`,
-        className: styles.entry,
-        head: <EntryHead title={entry.role} at={entry.company} dates={entry.dates} timeline={resolved.timeline} />,
+        className: cn(styles.entry, rolesCompact && styles.entryPlain),
+        head: <EntryHead title={entry.role} at={entry.company} dates={entry.dates} place={entry.location} timeline={resolved.timeline} columns={twoColumn} />,
         children: (
           <>
             {entry.descriptor && <p className={styles.descriptor}>{entry.descriptor}</p>}
@@ -126,13 +142,14 @@ export function ResumeDocument({ theme, profile, paper, layout, sections = DEFAU
           <Fragment key={project.id}>
             {renderUnit({
               id: `project:${project.id}`,
-              className: styles.entry,
+              className: cn(styles.entry, rolesCompact && styles.entryPlain),
               head: (
                 <EntryHead
                   title={project.name}
                   at={project.link && <DocumentLink link={project.link} href={project.href} />}
                   dates={project.dates}
                   timeline={resolved.timeline}
+                  columns={twoColumn}
                 />
               ),
               children: (
@@ -165,9 +182,20 @@ export function ResumeDocument({ theme, profile, paper, layout, sections = DEFAU
           <Fragment key={entry.id}>
             {renderUnit({
               id: `education:${entry.id}`,
-              className: styles.entry,
-              head: <EntryHead title={entry.degree} at={entry.school} dates={entry.dates} timeline={resolved.timeline} />,
-              children: entry.notes && <p className={styles.muted}>{entry.notes}</p>,
+              className: cn(styles.entry, othersCompact && styles.entryPlain),
+              head: <EntryHead title={entry.degree} at={entry.school} dates={entry.dates} timeline={resolved.timeline} columns={twoColumn} />,
+              children:
+                entry.notes &&
+                (twoColumn ? (
+                  // The template's resume-item: a bullet for each line.
+                  <ul className={styles.bullets}>
+                    {noteLines(entry.notes).map((line, index) => (
+                      <li key={index}>{line}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className={styles.muted}>{entry.notes}</p>
+                )),
             })}
           </Fragment>
         ))}
@@ -179,8 +207,8 @@ export function ResumeDocument({ theme, profile, paper, layout, sections = DEFAU
           <Fragment key={entry.id}>
             {renderUnit({
               id: `certification:${entry.id}`,
-              className: styles.entry,
-              head: <EntryHead title={entry.name} at={entry.issuer} dates={entry.date} timeline={resolved.timeline} />,
+              className: cn(styles.entry, othersCompact && styles.entryPlain),
+              head: <EntryHead title={entry.name} at={entry.issuer} dates={entry.date} timeline={resolved.timeline} columns={twoColumn} />,
               children: (entry.details.length > 0 || entry.link) && (
                 <p className={styles.muted}>
                   {[...entry.details, ...(entry.link ? [<DocumentLink key="link" link={entry.link} href={entry.href} />] : [])].map((part, index) => (
@@ -234,12 +262,12 @@ export function ResumeDocument({ theme, profile, paper, layout, sections = DEFAU
     ),
     skills: content.skills && (
       <DocumentSection key="skills" title={sectionHeading(sections, "skills", labels.skills)}>
-        {renderUnit({ id: "skills", children: <SkillLines text={content.skills} /> })}
+        {renderUnit({ id: "skills", children: twoColumn ? <SkillRows text={content.skills} /> : <SkillLines text={content.skills} /> })}
       </DocumentSection>
     ),
     languages: content.languages && (
       <DocumentSection key="languages" title={sectionHeading(sections, "languages", labels.languages)}>
-        {renderUnit({ id: "languages", children: <p>{content.languages}</p> })}
+        {renderUnit({ id: "languages", children: twoColumn ? <SkillRows text={content.languages} separator=" · " /> : <p>{content.languages}</p> })}
       </DocumentSection>
     ),
   };
@@ -248,7 +276,7 @@ export function ResumeDocument({ theme, profile, paper, layout, sections = DEFAU
     const key = customKey(section.id);
     drawn[key] = (
       <DocumentSection key={key} title={sectionHeading(sections, key, section.title)}>
-        <CustomSectionItems section={section} timeline={resolved.timeline} renderUnit={renderUnit} />
+        <CustomSectionItems section={section} timeline={resolved.timeline} columns={twoColumn} renderUnit={renderUnit} />
       </DocumentSection>
     );
   }
@@ -281,12 +309,23 @@ export function ResumeDocument({ theme, profile, paper, layout, sections = DEFAU
 
   return (
     <DocumentPage theme={resolved} paper={paper} lang={lang} dir={dir} label="Resume">
-      <header className={cn(styles.header, beside && styles.headerWithPhoto)}>
-        {position === PhotoPosition.ABOVE_NAME && photo("header", styles.photoAbove)}
-        {position === PhotoPosition.HEADER_START && photo("header")}
-        {beside ? <div className={styles.headerText}>{title}</div> : title}
-        {position === PhotoPosition.HEADER_END && photo("header")}
-      </header>
+      {twoColumn ? (
+        <TwoColumnHeader
+          name={content.name}
+          headline={content.headline}
+          address={rolesCompact ? [content.address, residenceStatus].filter(Boolean).join(" · ") : content.address}
+          entries={content.contactEntries}
+          personal={rolesCompact ? content.personal.filter(({ kind }) => kind !== "residence") : content.personal}
+          photo={content.photo && <CornerPhoto src={content.photo} name={content.name} />}
+        />
+      ) : (
+        <header className={cn(styles.header, beside && styles.headerWithPhoto)}>
+          {position === PhotoPosition.ABOVE_NAME && photo("header", styles.photoAbove)}
+          {position === PhotoPosition.HEADER_START && photo("header")}
+          {beside ? <div className={styles.headerText}>{title}</div> : title}
+          {position === PhotoPosition.HEADER_END && photo("header")}
+        </header>
+      )}
       <div className={styles.columns}>
         {columns.map((column, index) => (
           <div key={index} className={cn(styles.column, column === panel && styles.sidebarPanel)}>
@@ -332,7 +371,23 @@ const breakAfterDash = (dates: string) =>
  * the line, or before it in a timeline column (the dates come first then, so
  * they float into the column next to the title).
  */
-function EntryHead({ title, at, dates, timeline }: { title: string; at: ReactNode; dates: string; timeline: boolean }) {
+function EntryHead({
+  title,
+  at,
+  dates,
+  place = "",
+  timeline,
+  columns = false,
+}: {
+  title: string;
+  at: ReactNode;
+  dates: string;
+  /** Where it was; only the two-column layout shows it, under the dates. */
+  place?: string;
+  timeline: boolean;
+  columns?: boolean;
+}) {
+  if (columns) return <ColumnEntryHead title={title} at={at} dates={breakAfterDash(dates)} place={place} />;
   const datesSpan = dates && <span className={styles.dates}>{timeline ? breakAfterDash(dates) : dates}</span>;
   return (
     <div className={styles.entryHead}>
@@ -352,7 +407,17 @@ function EntryHead({ title, at, dates, timeline }: { title: string; at: ReactNod
 }
 
 /** A custom section's items in its format (#298). */
-function CustomSectionItems({ section, timeline, renderUnit }: { section: ResumeContent["customSections"][number]; timeline: boolean; renderUnit: UnitRenderer }) {
+function CustomSectionItems({
+  section,
+  timeline,
+  columns,
+  renderUnit,
+}: {
+  section: ResumeContent["customSections"][number];
+  timeline: boolean;
+  columns: boolean;
+  renderUnit: UnitRenderer;
+}) {
   if (section.format === "INLINE") {
     return renderUnit({ id: `custom-inline:${section.id}`, children: <p>{section.items.map((item) => item.title).join(" · ")}</p> });
   }
@@ -376,8 +441,8 @@ function CustomSectionItems({ section, timeline, renderUnit }: { section: Resume
           })
         : renderUnit({
             id: `custom-entry:${item.id}`,
-            className: styles.entry,
-            head: <EntryHead title={item.title} at={item.subtitle} dates={item.dates} timeline={timeline} />,
+            className: cn(styles.entry, columns && styles.entryPlain),
+            head: <EntryHead title={item.title} at={item.subtitle} dates={item.dates} timeline={timeline} columns={columns} />,
             children: (
               <>
                 {item.bullets.length > 0 && (

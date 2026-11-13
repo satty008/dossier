@@ -35,8 +35,11 @@ export const saveBasics = action(
     city: text(120),
     country: text(120),
     linkedin: text(500),
+    license: text(120),
+    residence: text(160),
     summary: text(5000),
     showAge: z.boolean(),
+    showDob: z.boolean(),
   }),
   async (basics) => {
     const before = await loadProfileName();

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { LanguageLevel } from "@/generated/prisma/enums";
 
+import { DOCUMENT_LANGUAGES } from "./document-language";
 import {
   ageOn,
   BASICS_FIELDS,
@@ -10,6 +11,7 @@ import {
   inEntryOrder,
   fieldsFromBasics,
   filledBasics,
+  formatBirthDate,
   formatDateRange,
   formatMonthYear,
   LANGUAGE_LEVELS,
@@ -106,11 +108,11 @@ describe("dates", () => {
 describe("basics", () => {
   const empty = {
     name: "", headline: "", email: "", phone: "", dob: "", website: "",
-    address: "", city: "", country: "", linkedin: "", summary: "",
+    address: "", city: "", country: "", linkedin: "", license: "", residence: "", summary: "",
   };
 
   it("counts filled required fields, ignoring whitespace", () => {
-    expect(BASICS_FIELDS).toHaveLength(11);
+    expect(BASICS_FIELDS).toHaveLength(13);
     expect(filledBasics(empty)).toBe(0);
     expect(filledBasics({ ...empty, name: "Jane", email: "jane.doe@example.com", city: "  " })).toBe(2);
   });
@@ -122,6 +124,78 @@ describe("basics", () => {
     expect(ageOn("1992-09-29", today)).toBe(33); // birthday tomorrow
     expect(ageOn("", today)).toBeNull();
     expect(ageOn("2030-01-01", today)).toBeNull();
+  });
+});
+
+describe("numeric dates", () => {
+  const span = { startYear: 2023, startMonth: 3, endYear: 2026, endMonth: 8, current: false };
+  const ongoing = { startYear: 2023, startMonth: 3, endYear: null, endMonth: null, current: true };
+
+  it("write the month as two digits and keep a year alone", () => {
+    expect(formatMonthYear(2021, 3, { numeric: true })).toBe("03/2021");
+    expect(formatMonthYear(2021, 11, { numeric: true })).toBe("11/2021");
+    expect(formatMonthYear(2013, null, { numeric: true })).toBe("2013");
+    expect(formatMonthYear(null, 3, { numeric: true })).toBe("");
+    expect(formatDateRange(span, { numeric: true })).toBe("03/2023 – 08/2026");
+    expect(formatDateRange(ongoing, { numeric: true, present: "heute" })).toBe("03/2023 – heute");
+  });
+
+  it("separate them with a dot in German, as dates are written there (08.11.1989, 03.2021)", () => {
+    for (const locale of ["de", "de-AT", "de-CH"]) {
+      expect(formatMonthYear(2021, 3, { numeric: true, locale }), locale).toBe("03.2021");
+    }
+    expect(formatMonthYear(2021, 11, { numeric: true, locale: "de" })).toBe("11.2021");
+    expect(formatMonthYear(2013, null, { numeric: true, locale: "de" })).toBe("2013");
+    expect(formatDateRange(span, { numeric: true, locale: "de" })).toBe("03.2023 – 08.2026");
+    expect(formatDateRange(ongoing, { numeric: true, locale: "de", present: "heute" })).toBe("03.2023 – heute");
+    // The same way as the date of birth it goes with.
+    expect(formatBirthDate("1989-11-08", { locale: "de" })).toBe("08.11.1989");
+  });
+
+  it("follow each language's own numeric dates, in its order and its digits", () => {
+    const written: Record<string, string> = {
+      en: "03/2021",
+      fr: "03/2021",
+      nl: "03-2021",
+      pl: "03.2021",
+      no: "03.2021",
+      cs: "03. 2021",
+      sv: "2021-03",
+      ja: "2021/03",
+      "zh-Hans": "2021/03",
+      ko: "2021. 03.",
+      fa: "۲۰۲۱/۰۳",
+    };
+    for (const [locale, expected] of Object.entries(written)) {
+      expect(formatMonthYear(2021, 3, { numeric: true, locale }), locale).toBe(expected);
+    }
+  });
+
+  it("are only digits and separators, with the month and the year, in every document language", () => {
+    for (const { name, tag } of DOCUMENT_LANGUAGES) {
+      const digits = new Intl.NumberFormat(tag, { useGrouping: false });
+      const written = formatMonthYear(2021, 3, { numeric: true, locale: tag });
+      expect(written, name).toContain(digits.format(2021));
+      expect(written, name).toContain(new Intl.NumberFormat(tag, { minimumIntegerDigits: 2, useGrouping: false }).format(3));
+      expect(written, name).not.toMatch(/\p{L}/u);
+      expect(written, name).toBe(written.trim());
+    }
+  });
+});
+
+describe("formatBirthDate", () => {
+  it("writes the date in the locale's order and digits", () => {
+    expect(formatBirthDate("1989-11-08", { locale: "de" })).toBe("08.11.1989");
+    expect(formatBirthDate("1989-11-08")).toBe("Nov 8, 1989");
+    // Gregorian, in Persian digits, not the Persian calendar's 1368.
+    expect(formatBirthDate("1989-11-08", { locale: "fa" })).toContain("۱۹۸۹");
+  });
+
+  it("leaves out a date that isn't one", () => {
+    expect(formatBirthDate("")).toBe("");
+    expect(formatBirthDate("1989-02-30")).toBe("");
+    expect(formatBirthDate("89-11-08")).toBe("");
+    expect(formatBirthDate("0089-11-08")).toBe("");
   });
 });
 
@@ -139,7 +213,7 @@ describe("profile strength", () => {
   });
 
   it("leaves out the optional basics (#216)", () => {
-    const optional = { ...basics, phone: "p", dob: "1992-04-18", website: "w", address: "a", linkedin: "l" };
+    const optional = { ...basics, phone: "p", dob: "1992-04-18", website: "w", address: "a", linkedin: "l", license: "B", residence: "r" };
     expect(profileStrength({ ...none, basics: optional }).percent).toBe(0);
     expect(filledBasics(optional)).toBe(0);
   });
@@ -164,18 +238,21 @@ describe("stored basics", () => {
     ...(Object.fromEntries(BASICS_FIELDS.map((field) => [field, ""])) as Record<(typeof BASICS_FIELDS)[number], string>),
     name: "Jane Doe",
     dob: "1992-04-18",
+    license: "Class B",
     showAge: true,
+    showDob: true,
   };
 
   it("stores filled-in fields as text and marks empty ones for removal", () => {
-    expect(fieldsFromBasics(basics)).toMatchObject({ name: "Jane Doe", dob: "1992-04-18", showAge: "true", email: null });
+    expect(fieldsFromBasics(basics)).toMatchObject({ name: "Jane Doe", dob: "1992-04-18", license: "Class B", showAge: "true", showDob: "true", email: null, residence: null });
     expect(fieldsFromBasics({ ...basics, showAge: false }).showAge).toBeNull();
+    expect(fieldsFromBasics({ ...basics, showDob: false }).showDob).toBeNull();
   });
 
   it("reads them back, with missing keys empty and unknown ones ignored", () => {
     const rows = Object.entries(fieldsFromBasics(basics)).flatMap(([key, value]) => (value === null ? [] : [{ key, value }]));
     expect(basicsFromFields(rows)).toEqual(basics);
-    expect(basicsFromFields([{ key: "nickname", value: "Lee" }])).toEqual({ ...basics, name: "", dob: "", showAge: false });
+    expect(basicsFromFields([{ key: "nickname", value: "Lee" }])).toEqual({ ...basics, name: "", dob: "", license: "", showAge: false, showDob: false });
   });
 });
 

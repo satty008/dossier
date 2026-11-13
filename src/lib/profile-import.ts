@@ -29,6 +29,8 @@ export const BASICS_LABELS: Record<BasicsField, string> = {
   city: "City",
   country: "Country",
   linkedin: "LinkedIn",
+  license: "Driving licence",
+  residence: "Residence status",
   summary: "About you",
 };
 

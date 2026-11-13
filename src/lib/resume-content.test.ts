@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { demoProfile, demoResumeUnits } from "@/lib/demo-profile";
+import { documentLabels } from "@/lib/document-labels";
 import type { ProfileData } from "@/lib/profile";
 
-import { contactItems, displayLink, resumeContent, sectionsWithContent } from "./resume-content";
+import { addressLine, contactEntries, contactItems, displayLink, personalDetails, resumeContent, sectionsWithContent } from "./resume-content";
 
 const today = new Date(2026, 8, 28);
 
@@ -34,6 +35,123 @@ describe("contactItems", () => {
   });
 });
 
+describe("contactEntries", () => {
+  const { basics } = demoProfile();
+
+  it("says what each detail is, in the order of contactItems", () => {
+    expect(contactEntries({ ...basics, showAge: true }, today)).toEqual([
+      { kind: "email", text: "jane.doe@example.com" },
+      { kind: "phone", text: "+31 6 1234 5678" },
+      { kind: "location", text: "Rotterdam, Netherlands" },
+      { kind: "website", text: "example.com" },
+      { kind: "linkedin", text: "linkedin.com/in/janedoe-example" },
+      { kind: "age", text: "Age 34" },
+    ]);
+    expect(contactEntries({ ...basics, showAge: true }, today).map(({ text }) => text)).toEqual(contactItems({ ...basics, showAge: true }, today));
+  });
+});
+
+describe("personalDetails", () => {
+  const { basics } = demoProfile();
+  const filled = { ...basics, dob: "1989-11-08", showDob: true, license: "EU Klasse B", residence: "Residence permit" };
+
+  it("lists the date of birth, driving licence and residence status that are filled in, each with its label", () => {
+    expect(personalDetails(filled)).toEqual([
+      { kind: "dob", label: "Date of birth", value: "Nov 8, 1989" },
+      { kind: "license", label: "Driving licence", value: "EU Klasse B" },
+      { kind: "residence", label: "Residence status", value: "Residence permit" },
+    ]);
+  });
+
+  it("writes the labels, and the date, in the document's language", () => {
+    expect(personalDetails(filled, documentLabels("German"))).toEqual([
+      { kind: "dob", label: "Geburtsdatum", value: "08.11.1989" },
+      { kind: "license", label: "Führerschein", value: "EU Klasse B" },
+      { kind: "residence", label: "Aufenthaltsstatus", value: "Residence permit" },
+    ]);
+  });
+
+  it("shows the date of birth only when the profile says so, and has none for a date that isn't one", () => {
+    expect(personalDetails({ ...filled, showDob: false }).map(({ kind }) => kind)).toEqual(["license", "residence"]);
+    expect(personalDetails({ ...filled, dob: "" }).map(({ kind }) => kind)).toEqual(["license", "residence"]);
+    expect(personalDetails({ ...filled, showAge: true, showDob: false }).map(({ kind }) => kind)).not.toContain("dob");
+  });
+
+  it("skips what's empty or blank, and trims the rest", () => {
+    expect(personalDetails({ ...filled, showDob: false, license: "  ", residence: " Blue Card " })).toEqual([
+      { kind: "residence", label: "Residence status", value: "Blue Card" },
+    ]);
+    expect(personalDetails(basics)).toEqual([]);
+  });
+
+  it("is not in the contact items, which a cover letter's sender line is made of", () => {
+    expect(contactItems(filled, today)).toEqual(contactItems(basics, today));
+    expect(contactEntries(filled, today)).toEqual(contactEntries(basics, today));
+  });
+});
+
+describe("addressLine", () => {
+  const { basics } = demoProfile();
+
+  it("puts the city and country after the street address", () => {
+    expect(addressLine(basics)).toBe("Westersingel 42, Rotterdam, Netherlands");
+  });
+
+  it("is the city and country without a street address", () => {
+    expect(addressLine({ ...basics, address: "" })).toBe("Rotterdam, Netherlands");
+    expect(addressLine({ ...basics, address: " ", city: "", country: "Netherlands" })).toBe("Netherlands");
+  });
+
+  it("is the street address as it is when that already names the city", () => {
+    expect(addressLine({ ...basics, address: "Bodoweg 12, 70327 Rotterdam, Netherlands" })).toBe("Bodoweg 12, 70327 Rotterdam, Netherlands");
+    expect(addressLine({ ...basics, address: "Westersingel 42", city: "70327 Rotterdam" })).toBe("Westersingel 42, 70327 Rotterdam, Netherlands");
+  });
+
+  it("is empty with nothing filled in", () => {
+    expect(addressLine({ ...basics, address: "", city: "", country: "" })).toBe("");
+  });
+});
+
+describe("resumeContent's dates", () => {
+  const profile = demoProfile();
+
+  it("name the month by default, and give it as digits when asked, for the two-column layouts", () => {
+    expect(resumeContent(profile, { today }).experience[0].dates).toBe("Mar 2021 – Present");
+    expect(resumeContent(profile, { today, numericDates: true }).experience[0].dates).toBe("03/2021 – Present");
+    expect(resumeContent(profile, { today, numericDates: true }).certifications[0].date).toMatch(/^\d{2}\/\d{4}$/);
+  });
+
+  it("write them with dots in German, 03.2021 – 08.2026, and the same way in the certifications and their expiry", () => {
+    const german = documentLabels("German");
+    const content = resumeContent(profile, { today, numericDates: true }, german);
+    expect(content.experience[0].dates).toBe("03.2021 – Heute");
+    expect(content.experience.map((role) => role.dates)).toEqual(["03.2021 – Heute", "06.2018 – 02.2021", "09.2015 – 05.2018"]);
+    expect(content.projects[0].dates).toBe("01.2023 – Heute");
+    expect(content.education.map((entry) => entry.dates)).toEqual(["2013 – 2015", "2010 – 2013"]);
+    expect(content.certifications[0].date).toBe("06.2022");
+    expect(content.certifications[0].details[0]).toBe("Gültig bis 06.2028");
+    // And the date of birth, in the same way, 08.11.1989.
+    const withDob = { ...profile, basics: { ...profile.basics, dob: "1989-11-08", showDob: true } };
+    expect(resumeContent(withDob, { today, numericDates: true }, german).personal[0]).toMatchObject({ kind: "dob", value: "08.11.1989" });
+  });
+});
+
+describe("resumeContent's personal details", () => {
+  const profile = demoProfile();
+  const personal = { ...profile, basics: { ...profile.basics, dob: "1989-11-08", showDob: true, license: "Class B", residence: "Permanent residence" } };
+
+  it("has them in `personal`, and after the contact details in `contacts` for the layouts that have no line of their own", () => {
+    const content = resumeContent(personal, { today });
+    expect(content.personal.map(({ kind }) => kind)).toEqual(["dob", "license", "residence"]);
+    expect(content.contacts.slice(-3)).toEqual(["Date of birth: Nov 8, 1989", "Driving licence: Class B", "Residence status: Permanent residence"]);
+    expect(content.contactEntries.map(({ kind }) => kind)).not.toContain("license");
+  });
+
+  it("has none by default", () => {
+    expect(resumeContent(profile, { today }).personal).toEqual([]);
+  });
+});
+
 describe("resumeContent", () => {
   const profile = demoProfile();
 
@@ -46,6 +164,7 @@ describe("resumeContent", () => {
       ["Studio Brik", "Sep 2015 – May 2018"],
     ]);
     expect(content.experience[0].bullets).toHaveLength(3);
+    expect(content.experience.map((role) => role.location)).toEqual(["Rotterdam", "Amsterdam", "Rotterdam"]);
     expect(content.experience[2].skills).toEqual(["HTML & CSS", "Interaction design"]);
     expect(content.education[0]).toMatchObject({ dates: "2013 – 2015", notes: "Thesis on trust in automated scheduling tools" });
     expect(content.skills).toBe(
@@ -85,6 +204,9 @@ describe("resumeContent", () => {
       headline: "",
       photo: null,
       contacts: [],
+      contactEntries: [],
+      personal: [],
+      address: "",
       summary: "",
       experience: [],
       volunteering: [],

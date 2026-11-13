@@ -34,6 +34,8 @@ const FIELDS: FieldSpec[] = [
   { field: "city", label: "City", placeholder: "Springfield", autoComplete: "address-level2" },
   { field: "country", label: "Country", placeholder: "United States", autoComplete: "country-name" },
   { field: "linkedin", label: "LinkedIn", wide: true, placeholder: "linkedin.com/in/johndoe" },
+  { field: "license", label: "Driving licence", placeholder: "Class B" },
+  { field: "residence", label: "Residence status", placeholder: "Permanent residence" },
 ];
 
 // Gentle format hints: they never block saving.
@@ -115,6 +117,26 @@ export function BasicsSection({
         checked={basics.showAge}
         onChange={(event) => onChange({ ...basics, showAge: event.target.checked })}
       />
+      <Checkbox
+        className="col-span-2"
+        label={
+          <>
+            Show my date of birth on resumes
+            {(age === null || !basics.showDob) && (
+              <>
+                {" "}
+                <span className="text-meta text-muted">{age === null ? "(add your date of birth first)" : "(off by default)"}</span>
+              </>
+            )}
+          </>
+        }
+        checked={basics.showDob}
+        onChange={(event) => onChange({ ...basics, showDob: event.target.checked })}
+      />
+      <p className="col-span-2 text-meta text-muted">
+        A driving licence and a residence status appear on resumes when they&apos;re filled in. With your date of birth, if you show it, they sit under your header
+        in the Ram and Priya themes, and with your contact details in the others.
+      </p>
     </Card>
   );
 }

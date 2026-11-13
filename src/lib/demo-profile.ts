@@ -50,8 +50,11 @@ export function demoProfile(): ProfileData {
       city: basics.city,
       country: basics.country,
       linkedin: basics.linkedin,
+      license: "",
+      residence: "",
       summary: basics.summary,
       showAge,
+      showDob: false,
     },
     skills: skills.map((name) => ({ id: skillId(name), name, group: "" })),
     languages: languages.map(({ name, level }, index) => ({

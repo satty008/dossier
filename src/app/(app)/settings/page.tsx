@@ -23,6 +23,7 @@ import { loadProfileName } from "@/lib/profile-data";
 import { scoringProblem } from "@/lib/scoring";
 import { loadScoringConfig, scoringView } from "@/lib/scoring/config";
 import { loadSettings } from "@/lib/settings-data";
+import { loadThemes } from "@/lib/theme-data";
 import { availableUpdate } from "@/lib/update-check";
 import { USAGE_PING_HOST, usagePingChoice } from "@/lib/usage-ping";
 
@@ -126,6 +127,7 @@ export default async function SettingsPage({ searchParams }: PageProps<"/setting
         <DocumentsSection
           // Only these fields: the settings also hold the encrypted API key, which never leaves the server.
           initial={{
+            baseThemeId: settings.baseThemeId,
             paper: settings.paper,
             dateFormat: settings.dateFormat,
             defaultTone: settings.defaultTone,
@@ -136,6 +138,7 @@ export default async function SettingsPage({ searchParams }: PageProps<"/setting
             includeRefs: settings.includeRefs,
             documentsToWrite: settings.documentsToWrite,
           }}
+          themes={(await loadThemes()).map(({ id, name, builtIn }) => ({ id, name, builtIn }))}
           preview={await filePreview()}
         />
       ) : (

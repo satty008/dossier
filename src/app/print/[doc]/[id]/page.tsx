@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { TailoredLetter, TailoredResume } from "@/components/documents/tailored-documents";
+import { ThemeLayout } from "@/generated/prisma/enums";
 import { loadDocuments } from "@/lib/application-documents";
 import { verifyPrintAccess } from "@/lib/pdf/print-access";
 import { printCss } from "@/lib/themes";
@@ -22,7 +23,7 @@ export default async function PrintTailoredDocumentPage({ params }: PageProps<"/
 
   return (
     <>
-      <style>{printCss(document.theme, settings.paper)}</style>
+      <style>{printCss(document.theme, settings.paper, 0, doc === "letter" ? ThemeLayout.SINGLE : undefined)}</style>
       {doc === "resume" ? (
         <TailoredResume
           resume={document}

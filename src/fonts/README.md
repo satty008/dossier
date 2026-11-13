@@ -19,13 +19,15 @@ All fonts are licensed under the SIL Open Font License 1.1; each folder has its 
 | `work-sans` | Work Sans | 400, 500, 600, 700 | `ofl/worksans/WorkSans[wght].ttf` |
 | `space-grotesk` | Space Grotesk | 400, 500, 600, 700 | `ofl/spacegrotesk/SpaceGrotesk[wght].ttf` |
 | `jetbrains-mono` | JetBrains Mono | 400, 500, 600, 700 | `ofl/jetbrainsmono/JetBrainsMono[wght].ttf` |
+| `source-sans-3` | Source Sans 3 | 400, 500, 600, 700 | `ofl/sourcesans3/SourceSans3[wght].ttf` |
+| `roboto` | Roboto | 100, 400, 500, 700 | `ofl/roboto/Roboto[wdth,wght].ttf` |
 | `ibm-plex-sans-arabic` | IBM Plex Sans Arabic | 400, 500, 600 | `ofl/ibmplexsansarabic/IBMPlexSansArabic-{Regular,Medium,SemiBold}.ttf` |
 | `ibm-plex-sans-devanagari` | IBM Plex Sans Devanagari | 400, 500, 600 | `ofl/ibmplexsansdevanagari/IBMPlexSansDevanagari-{Regular,Medium,SemiBold}.ttf` |
 | `ibm-plex-sans-jp` | IBM Plex Sans JP | 400, 500, 600 | `ofl/ibmplexsansjp/IBMPlexSansJP-{Regular,Medium,SemiBold}.ttf` |
 | `ibm-plex-sans-kr` | IBM Plex Sans KR | 400, 500, 600 | `ofl/ibmplexsanskr/IBMPlexSansKR-{Regular,Medium,SemiBold}.ttf` |
 | `noto-sans-sc` | Noto Sans SC | 400, 600, GB 2312 subset | `ofl/notosanssc/NotoSansSC[wght].ttf` |
 
-The first five were downloaded on 27 September 2026, the script fonts on 28 September 2026, the theme fonts from Source Serif 4 to JetBrains Mono on 3 October 2026, and IBM Plex Mono SemiBold on 4 November 2026. They keep every script the originals cover (the OFL allows this without renaming fonts with a Reserved Font Name such as Plex). The one exception is Noto Sans SC, below.
+The first five were downloaded on 27 September 2026, the script fonts on 28 September 2026, the theme fonts from Source Serif 4 to JetBrains Mono on 3 October 2026, IBM Plex Mono SemiBold on 4 November 2026, and Source Sans 3 and Roboto, for the Two column theme, on 13 November 2026. They keep every script the originals cover (the OFL allows this without renaming fonts with a Reserved Font Name such as Plex). The one exception is Noto Sans SC, below.
 
 ## Static faces, not variable fonts
 

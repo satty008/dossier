@@ -13,7 +13,7 @@ vi.mock("@/components/toast", () => ({ toast: vi.fn() }));
 
 const empty: Basics = {
   name: "", headline: "", email: "", phone: "", dob: "", website: "",
-  address: "", city: "", country: "", linkedin: "", summary: "", showAge: false,
+  address: "", city: "", country: "", linkedin: "", license: "", residence: "", summary: "", showAge: false, showDob: false,
 };
 
 function Harness({ initial = empty }: { initial?: Basics }) {
@@ -35,7 +35,7 @@ describe("BasicsSection", () => {
     render(<Harness />);
     for (const label of [
       "Full name", "Headline", "Email", "Phone (optional)", "Date of birth (optional)", "Website (optional)",
-      "Street address (optional)", "City", "Country", "LinkedIn (optional)",
+      "Street address (optional)", "City", "Country", "LinkedIn (optional)", "Driving licence (optional)", "Residence status (optional)",
     ]) {
       expect(screen.getByLabelText(label)).toBeInTheDocument();
     }
@@ -87,6 +87,29 @@ describe("BasicsSection", () => {
     expect(website).not.toHaveAccessibleDescription();
     fireEvent.change(website, { target: { value: "my site" } });
     expect(website).toHaveAccessibleDescription(/doesn't look like a web address/);
+  });
+
+  it("has a switch for showing the date of birth itself, off by default, and saves it", async () => {
+    render(<Harness />);
+    const option = screen.getByRole("checkbox", { name: /Show my date of birth on resumes/ });
+    expect(option).not.toBeChecked();
+    expect(option).toHaveAccessibleName("Show my date of birth on resumes (add your date of birth first)");
+
+    fireEvent.change(screen.getByLabelText("Date of birth (optional)"), { target: { value: "1989-11-08" } });
+    expect(option).toHaveAccessibleName("Show my date of birth on resumes (off by default)");
+    fireEvent.click(option);
+    // Once it's on, the hint about it being off goes.
+    expect(option).toHaveAccessibleName("Show my date of birth on resumes");
+    await act(async () => vi.advanceTimersByTimeAsync(500));
+    expect(saveBasics).toHaveBeenCalledWith({ ...empty, dob: "1989-11-08", showDob: true });
+  });
+
+  it("saves a driving licence and a residence status as typed", async () => {
+    render(<Harness />);
+    fireEvent.change(screen.getByLabelText("Driving licence (optional)"), { target: { value: "EU Klasse B" } });
+    fireEvent.change(screen.getByLabelText("Residence status (optional)"), { target: { value: "Residence permit" } });
+    await act(async () => vi.advanceTimersByTimeAsync(500));
+    expect(saveBasics).toHaveBeenLastCalledWith({ ...empty, license: "EU Klasse B", residence: "Residence permit" });
   });
 
   it("saves the age option", async () => {

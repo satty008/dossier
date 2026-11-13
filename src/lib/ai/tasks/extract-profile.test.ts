@@ -49,6 +49,8 @@ const answer = {
     city: "Utrecht",
     country: "Netherlands",
     linkedin: "",
+    license: null,
+    residence: null,
     summary: null,
   },
   skills: ["Figma", "Design systems", "User research", "figma"],
@@ -146,7 +148,7 @@ describe("extractProfile (E4-10)", () => {
   it("checks the answer: dates in range, levels, one of each skill, and names looked up in the resume", async () => {
     const provider = new MockProvider({ reply: () => answer });
     const { data, promptVersion } = await extractProfile(provider, { resume: RESUME, today: new Date("2026-09-29") }, options);
-    expect(promptVersion).toBe("extract-profile@6");
+    expect(promptVersion).toBe("extract-profile@7");
     expect(data.basics).toEqual({
       name: "John Doe",
       headline: "Senior Product Designer",
@@ -264,6 +266,23 @@ describe("extractProfile (E4-10)", () => {
     ]);
     // Not in the resume: marked for checking.
     expect(data.references).toEqual([{ name: "Jane Doe", relation: "Former manager", company: "Fieldnote", email: "", phone: "", unverified: ["Jane Doe"] }]);
+  });
+
+  it("reads a driving licence and a residence status the file gives, and leaves out ones it doesn't", async () => {
+    const resume = `${RESUME}\nFührerschein: EU Klasse B\nAufenthaltsstatus: Aufenthaltserlaubnis`;
+    const read = (basics: Partial<Record<keyof typeof answer.basics, string | null>>) =>
+      extractProfile(new MockProvider({ reply: () => ({ ...answer, basics: { ...answer.basics, ...basics } }) }), { resume }, options);
+    const { data } = await read({ license: "EU Klasse B", residence: "Aufenthaltserlaubnis" });
+    expect(data.basics).toMatchObject({ license: "EU Klasse B", residence: "Aufenthaltserlaubnis" });
+    expect((await read({ license: "Class C", residence: "Blue Card" })).data).toMatchObject({
+      basics: expect.not.objectContaining({ license: expect.anything(), residence: expect.anything() }),
+      leftOut: expect.arrayContaining(["Driving licence “Class C”: not in the file", "Residence status “Blue Card”: not in the file"]),
+    });
+    // The prompt asks for them.
+    const provider = new MockProvider({ reply: () => answer });
+    await extractProfile(provider, { resume: RESUME }, options);
+    expect(provider.calls[0].system).toContain("license (their driving licence");
+    expect(provider.calls[0].system).toContain("residence (their residence or work permit status");
   });
 
   it("drops a date of birth that isn't a whole, real date", async () => {

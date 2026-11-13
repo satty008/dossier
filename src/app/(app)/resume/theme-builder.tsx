@@ -20,6 +20,7 @@ import {
   SIDEBAR_STYLES,
   THEME_FONTS,
   accentName,
+  hasColumns,
   hasSidebar,
   readableOnWhite,
   type ThemeData,
@@ -58,6 +59,8 @@ export function ThemeBuilder({ draft, onChange, onSave, onCancel, saving }: Them
     ? ACCENTS
     : [{ value: draft.accent, name: accentName(draft.accent) }, ...ACCENTS];
   const split = hasSidebar(draft.layout);
+  // The two-column layouts bring their own header, photo, section titles, dates and spacing.
+  const columns = hasColumns(draft.layout);
 
   return (
     <form
@@ -104,34 +107,44 @@ export function ThemeBuilder({ draft, onChange, onSave, onCancel, saving }: Them
           </>
         )}
       </Group>
-      <Choices label="Layout" value={draft.layout} options={options(LAYOUTS)} onChange={set("layout")} />
+      <Choices
+        label="Layout"
+        value={draft.layout}
+        options={options(LAYOUTS)}
+        onChange={set("layout")}
+        hint={columns ? "Its header, photo, section titles, dates and spacing come with the layout. The fonts and the accent are yours." : undefined}
+      />
       {split && <Choices label="Sidebar" value={draft.sidebarStyle} options={options(SIDEBAR_STYLES)} onChange={set("sidebarStyle")} />}
-      <Choices
-        label="Header"
-        value={split ? "LEFT" : draft.align}
-        options={options(ALIGNMENTS)}
-        onChange={set("align")}
-        disabled={split}
-        hint={split ? "Sidebar layouts always align the header left." : undefined}
-      />
-      <Choices label="Header style" value={draft.headerStyle} options={options(HEADER_STYLES)} onChange={set("headerStyle")} />
-      <Choices
-        label="Photo"
-        value={draft.photoShape}
-        options={options(PHOTO_SHAPES)}
-        onChange={set("photoShape")}
-        hint="Your photo from Profile → Basics, while it's shown on resumes."
-      />
-      <Choices
-        label="Photo position"
-        // Only sidebar layouts have a sidebar to put it in; the others show it at the end of the header.
-        value={!split && draft.photoPosition === PhotoPosition.SIDEBAR ? PhotoPosition.HEADER_END : draft.photoPosition}
-        options={options(PHOTO_POSITIONS).filter((option) => split || option.value !== PhotoPosition.SIDEBAR)}
-        onChange={set("photoPosition")}
-      />
-      <Choices label="Section titles" value={draft.headingStyle} options={options(HEADING_STYLES)} onChange={set("headingStyle")} />
-      <Choices label="Dates" value={draft.dateStyle} options={options(DATE_STYLES)} onChange={set("dateStyle")} />
-      <Choices label="Spacing" value={draft.density} options={options(DENSITIES)} onChange={set("density")} />
+      {!columns && (
+        <>
+          <Choices
+            label="Header"
+            value={split ? "LEFT" : draft.align}
+            options={options(ALIGNMENTS)}
+            onChange={set("align")}
+            disabled={split}
+            hint={split ? "Sidebar layouts always align the header left." : undefined}
+          />
+          <Choices label="Header style" value={draft.headerStyle} options={options(HEADER_STYLES)} onChange={set("headerStyle")} />
+          <Choices
+            label="Photo"
+            value={draft.photoShape}
+            options={options(PHOTO_SHAPES)}
+            onChange={set("photoShape")}
+            hint="Your photo from Profile → Basics, while it's shown on resumes."
+          />
+          <Choices
+            label="Photo position"
+            // Only sidebar layouts have a sidebar to put it in; the others show it at the end of the header.
+            value={!split && draft.photoPosition === PhotoPosition.SIDEBAR ? PhotoPosition.HEADER_END : draft.photoPosition}
+            options={options(PHOTO_POSITIONS).filter((option) => split || option.value !== PhotoPosition.SIDEBAR)}
+            onChange={set("photoPosition")}
+          />
+          <Choices label="Section titles" value={draft.headingStyle} options={options(HEADING_STYLES)} onChange={set("headingStyle")} />
+          <Choices label="Dates" value={draft.dateStyle} options={options(DATE_STYLES)} onChange={set("dateStyle")} />
+          <Choices label="Spacing" value={draft.density} options={options(DENSITIES)} onChange={set("density")} />
+        </>
+      )}
       <div className="flex gap-2 pt-1.5">
         <Button type="submit" className="flex-1" disabled={saving}>
           {saving ? "Saving…" : "Save theme"}

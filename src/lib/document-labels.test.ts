@@ -46,6 +46,18 @@ describe("document labels", () => {
     expect(ageLabel(34, documentLabels("Persian"))).toBe("۳۴ سال");
   });
 
+  it("names the personal details a resume lists in every language, English and German as the first two templates do", () => {
+    for (const { name } of DOCUMENT_LANGUAGES.filter((language) => language.name !== "English")) {
+      const labels = documentLabels(name);
+      for (const key of ["dateOfBirth", "drivingLicence", "residenceStatus"] as const) {
+        expect(labels[key], `${name}: ${key}`).toBeTruthy();
+        expect(labels[key], `${name}: ${key}`).not.toBe(ENGLISH_LABELS[key]);
+      }
+    }
+    expect(ENGLISH_LABELS).toMatchObject({ dateOfBirth: "Date of birth", drivingLicence: "Driving licence", residenceStatus: "Residence status" });
+    expect(documentLabels("German")).toMatchObject({ dateOfBirth: "Geburtsdatum", drivingLicence: "Führerschein", residenceStatus: "Aufenthaltsstatus" });
+  });
+
   it("greets the company's team where the language does, and a cover-all greeting otherwise", () => {
     expect(ENGLISH_LABELS.greeting("Ledgerly")).toBe("Dear Ledgerly team,");
     expect(ENGLISH_LABELS.greeting("")).toBe("Dear hiring team,");

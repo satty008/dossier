@@ -46,6 +46,8 @@ function themeClasses(theme: ResolvedTheme) {
     theme.sidebarEnd && styles.sidebarEnd,
     theme.tintedSidebar && styles.tintedSidebar,
     theme.sideHeadings && styles.sideHeadings,
+    theme.columns && styles.twoColumn,
+    theme.compactRoles && styles.twoColumnCompact,
     theme.centered && styles.centered,
     theme.banner && styles.banner,
     theme.timeline && styles.timeline,
@@ -126,9 +128,12 @@ export function Contact({ children }: { children: string }) {
   return <bdi dir={hasRightToLeft(children) ? undefined : "ltr"}>{children}</bdi>;
 }
 
-/** A contact detail, as a link when it's an email or web address (#369): the address stays the text, for parsers. */
-export function ContactDetail({ children }: { children: string }) {
-  const href = contactHref(children);
+/**
+ * A contact detail, as a link when it's an email or web address (#369): the
+ * address stays the text, for parsers. `href` is for a detail shown as other
+ * words than its address (null for none).
+ */
+export function ContactDetail({ children, href = contactHref(children) }: { children: string; href?: string | null }) {
   return href ? (
     <a href={href} target="_blank" rel="noreferrer" className={styles.contactLink}>
       <Contact>{children}</Contact>

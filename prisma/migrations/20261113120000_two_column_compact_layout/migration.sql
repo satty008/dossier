@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "ThemeLayout" ADD VALUE 'TWO_COLUMN_COMPACT';

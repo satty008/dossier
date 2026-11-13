@@ -4,9 +4,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { toast } from "@/components/toast";
 
+import { setBaseTheme } from "../resume/actions";
 import { addDocumentLanguage, updateSettings } from "./actions";
 import { DocumentsSection, type DocumentSettings } from "./documents-section";
 
+vi.mock("../resume/actions", () => ({ setBaseTheme: vi.fn(async () => ({ ok: true, data: null })) }));
 vi.mock("./actions", () => ({
   updateSettings: vi.fn(async () => ({ ok: true, data: null })),
   addDocumentLanguage: vi.fn(async ({ name }: { name: string }) => ({ ok: true, data: { language: name, added: true } })),
@@ -14,6 +16,7 @@ vi.mock("./actions", () => ({
 vi.mock("@/components/toast", () => ({ toast: vi.fn(), toastResult: (result: unknown) => result }));
 
 const initial: DocumentSettings = {
+  baseThemeId: "default-ram",
   documentsToWrite: "both",
   paper: "A4",
   dateFormat: "DAY_MONTH_YEAR",
@@ -25,9 +28,16 @@ const initial: DocumentSettings = {
   includeRefs: false,
 };
 const preview = { name: "Jane Doe", company: "Ledgerly", role: "Senior Product Designer" };
-const open = () => render(<DocumentsSection initial={initial} preview={preview} />);
+const themes = [
+  { id: "editorial", name: "Editorial", builtIn: true },
+  { id: "default-ram", name: "Ram", builtIn: true },
+  { id: "default-priya", name: "Priya", builtIn: true },
+  { id: "c1", name: "Mine", builtIn: false },
+];
+const open = () => render(<DocumentsSection initial={initial} themes={themes} preview={preview} />);
 
 beforeEach(() => {
+  vi.mocked(setBaseTheme).mockClear();
   vi.mocked(updateSettings).mockClear();
   vi.mocked(addDocumentLanguage).mockClear();
   vi.mocked(toast).mockClear();
@@ -43,6 +53,31 @@ describe("Documents settings (E10-3)", () => {
     expect(screen.getByLabelText("Cover letter tone")).toHaveDisplayValue("Warm");
     expect(screen.getByRole("switch", { name: "Include references" })).toHaveAttribute("aria-checked", "false");
     expect(screen.getByLabelText("Documents to write")).toHaveDisplayValue("Resume and cover letter");
+  });
+
+  it("chooses the default resume format from the themes, Ram's and Priya's among the built-in ones, and saves it as the base theme", async () => {
+    const user = userEvent.setup();
+    open();
+    const select = screen.getByLabelText("Default resume format") as HTMLSelectElement;
+    expect(select).toHaveDisplayValue("Ram");
+    expect([...select.options].map((option) => option.text)).toEqual(["Editorial", "Ram", "Priya", "Mine"]);
+    expect([...select.querySelectorAll("optgroup")].map((group) => group.label)).toEqual(["Built-in", "Your themes"]);
+    await user.selectOptions(select, "Priya");
+    expect(setBaseTheme).toHaveBeenLastCalledWith({ id: "default-priya" });
+    expect(select).toHaveDisplayValue("Priya");
+    await user.selectOptions(select, "Mine");
+    expect(setBaseTheme).toHaveBeenLastCalledWith({ id: "c1" });
+    // It isn't one of the plain settings, which have their own action.
+    expect(updateSettings).not.toHaveBeenCalled();
+  });
+
+  it("puts the previous format back when the base theme can't be saved", async () => {
+    const user = userEvent.setup();
+    vi.mocked(setBaseTheme).mockResolvedValueOnce({ ok: false, error: "That theme doesn't exist anymore." } as never);
+    open();
+    const select = screen.getByLabelText("Default resume format");
+    await user.selectOptions(select, "Priya");
+    expect(select).toHaveDisplayValue("Ram");
   });
 
   it("offers the posting's language, the 21 built-in ones and the user's own", () => {

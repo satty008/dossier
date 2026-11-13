@@ -192,7 +192,7 @@
 /* ─── Entries (roles, education) ───────────────────────────────────────── */
 
 .entry + .entry {
-  margin-top: calc(var(--u) * var(--item-gap));
+  margin-top: calc(var(--u) * var(--tc-item-gap));
 }
 
 /* A role's or degree's title line stays with what follows it. */
@@ -418,7 +418,7 @@
 }
 
 .sideHeadings .section > .entry + .entry {
-  margin-top: calc(var(--u) * (6 + var(--item-gap)));
+  margin-top: calc(var(--u) * (6 + var(--tc-item-gap)));
 }
 
 /*
@@ -460,6 +460,385 @@
 .headingBand .sectionTitle {
   padding: calc(var(--u) * 3) calc(var(--u) * 7);
   background: color-mix(in srgb, var(--accent) 10%, #fff);
+}
+
+/* ─── Two-column entries ───────────────────────────────────────────────── */
+
+/*
+ * The layouts of the modern-cv template for Typst, as compiled (Typst 0.15),
+ * in that template's points: --pt is one point at the page's own scale, from
+ * its 9.5 pt text, and --sp the same for the gaps between blocks, which "Fit
+ * to one page" tightens through the density's gap before it touches the type.
+ * There are two of them, one for each of the templates this was made from:
+ * Ram's, whose roles are blocks of their own, and Priya's (.twoColumnCompact),
+ * whose roles are as compact as education entries, with its photo reaching
+ * into the top margin, and its education entries the roomy ones.
+ *
+ * Typst measures a line of text from the top of its capitals to its baseline,
+ * so text-box trims the same space off each block, and the gaps are its own:
+ * a gap between two blocks is the strong spacings between them (a v()) plus
+ * the one weak spacing that wins among the rest (a heading's 19.8 pt beats a
+ * block's 6.6, which beats the 8.25 of paragraph spacing). Margins collapse
+ * to the largest in the same way, so the winners are set, and a strong
+ * spacing is padding, which doesn't. An entry's dates and place are in a
+ * column of 2.7 cm, its title and company 0.35 cm after it.
+ */
+.twoColumn {
+  --pt: calc(var(--u) * var(--font-size) / 9.5);
+  --sp: calc(var(--pt) * var(--gap) / 15.96);
+  /* The column before an entry, and how far its text is indented: the column and the gutter. */
+  --meta-width: calc(var(--pt) * 76.54);
+  --meta-indent: calc(var(--pt) * 86.46);
+  --doc-ink: #333;
+  --doc-text: #333;
+  --doc-muted: #5f6872;
+  /* What the two templates set differently, in points: the text of a compact entry, the gap between its lines and the company's under the title. */
+  --tc-item-size: 9;
+  --tc-item-line: 10.89;
+  --tc-item-gap: 4.95;
+  --tc-at-gap: 5.5;
+  /* The photo's place against the top corner of the text area, and the least height of a header that has one. */
+  --tc-photo-top: 0;
+  --tc-photo-end: -15.03;
+  --tc-header-min: 82;
+  isolation: isolate;
+  text-align: justify;
+  hyphens: auto;
+}
+
+/* Priya's template: its compact entries are 9.5 pt, the company is 12.76 pt under the title, and the photo is 0.65 cm higher and 0.5 cm into the margin. */
+.twoColumnCompact {
+  --tc-item-size: 9.5;
+  --tc-item-line: 11.495;
+  --tc-item-gap: 5.225;
+  --tc-at-gap: 7.15;
+  --tc-photo-top: -18.43;
+  --tc-photo-end: -14.17;
+  --tc-header-min: 0;
+}
+
+.twoColumn :is(.name, .headline, .address, .contactLine, .personalLine, .metaDates, .metaPlace, .entryTitle, .entryAt, .descriptor, .summary, .entrySkills, .muted, .publication, .skillLabel, .skillItems, .skillBare, .bullets li) {
+  text-box-trim: trim-both;
+  text-box-edge: cap alphabetic;
+}
+
+/* Sections are blocks, so their margins collapse. */
+.twoColumn :is(.column, .section) {
+  display: block;
+}
+
+/* The header: centred, each part on a line of its own, 8.25 pt apart. */
+.twoColumnHeader {
+  position: relative;
+  align-items: center;
+  gap: calc(var(--sp) * 8.25);
+  margin-bottom: 0;
+  text-align: center;
+}
+
+/*
+ * With a photo, tall enough that the first section's rule passes 4.7 pt under
+ * it (the template's own header has a line more, and the rule 14.8 pt under),
+ * and its lines kept clear of it: the photo reaches 70 pt into the text
+ * area, and the lines are centred on the page, so they can be 71.5 pt
+ * short of it on each side.
+ */
+.headerWithCorner {
+  min-height: calc(var(--pt) * var(--tc-header-min));
+}
+
+.headerWithCorner > :not(.photoCorner) {
+  max-width: calc(100% - var(--pt) * 143);
+}
+
+.twoColumn .name {
+  padding-bottom: calc(var(--pt) * 5);
+  font-size: calc(var(--pt) * 32);
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+  color: var(--doc-ink);
+}
+
+.nameFirst {
+  font-weight: 100;
+  color: var(--accent);
+}
+
+.twoColumn .headline {
+  white-space: pre-wrap;
+  font-size: calc(var(--pt) * 9);
+  font-weight: 400;
+  font-variant-caps: small-caps;
+  line-height: 1;
+}
+
+/* The lines with icons reach 7.5 pt above their baseline, and the contacts 1.5 pt below it. */
+.twoColumn :is(.address, .contactLine) {
+  margin: 0;
+  padding-top: calc(var(--pt) * 1.56);
+  font-size: calc(var(--pt) * 9);
+  line-height: calc(var(--pt) * 9);
+  color: var(--doc-text);
+  white-space: normal;
+  overflow-wrap: normal;
+}
+
+.twoColumn .contactLine {
+  padding-bottom: calc(var(--pt) * 1.5);
+}
+
+.contact {
+  white-space: nowrap;
+}
+
+.bar {
+  margin-inline: calc(var(--pt) * 2);
+}
+
+/* The personal details in 8.5 pt, with a bar between them and 0.4 em either side of it, and 3.3 pt (v(0.3em)) under them. */
+.twoColumn .personalLine {
+  margin: 0;
+  padding-bottom: calc(var(--pt) * 3.3);
+  font-size: calc(var(--pt) * 8.5);
+  line-height: calc(var(--pt) * 8.5);
+  color: var(--doc-text);
+  white-space: normal;
+}
+
+.personal {
+  white-space: nowrap;
+}
+
+.personalBar {
+  margin-inline: calc(var(--pt) * 3.4);
+}
+
+/*
+ * Font Awesome's icons, drawn as paths (contact-icons.tsx): as tall as the
+ * text, from 0.125 em under its baseline up, 4 pt before it, and not part of
+ * the line's height. An icon sits by the bottom of its margin, so with
+ * margins of -0.5 em it's raised 0.375 em to end 0.125 em under the baseline.
+ */
+.icon {
+  display: inline-block;
+  height: 1em;
+  width: auto;
+  margin-block: -0.5em;
+  margin-inline-end: calc(var(--pt) * 4);
+  overflow: visible;
+  vertical-align: 0.375em;
+  fill: #131a28;
+}
+
+/* The photo: 3 × 3.8 cm in the top corner, 0.53 cm into the margin (Priya's: 0.5 cm, and 0.65 cm above the text), under whatever reaches it. */
+.photoCorner {
+  position: absolute;
+  top: calc(var(--pt) * var(--tc-photo-top));
+  inset-inline-end: calc(var(--pt) * var(--tc-photo-end));
+  z-index: -1;
+  width: calc(var(--pt) * 85.04);
+  height: calc(var(--pt) * 107.72);
+  border-radius: calc(var(--pt) * 2);
+  object-fit: cover;
+}
+
+/*
+ * A section's title in bold in the accent, then a 1 pt rule to the margin: a
+ * box as wide as the line, drawn at the baseline and cut off at the edge.
+ * 19.8 pt above it and 8.25 pt below: the largest of these gaps and the
+ * neighbours' wins.
+ */
+.twoColumn .sectionTitle {
+  margin: calc(var(--sp) * 19.8) 0 calc(var(--sp) * 8.25);
+  padding: 0;
+  border: 0;
+  overflow-x: clip;
+  font-family: var(--body-font);
+  font-size: calc(var(--pt) * 16);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  text-align: start;
+  text-transform: none;
+  text-box-trim: trim-both;
+  text-box-edge: cap alphabetic;
+}
+
+.twoColumn .sectionTitle::after {
+  content: "";
+  display: inline-block;
+  width: 100%;
+  margin-inline: calc(var(--pt) * 3.2) -100%;
+  border-bottom: calc(var(--pt) * 1) solid #000;
+  translate: 0 calc(var(--pt) * 0.5);
+  vertical-align: baseline;
+}
+
+/*
+ * An entry, the template's work-entry: its dates and place float into the
+ * column before its text, as in a timeline. Below it, 8.25 pt of paragraph
+ * spacing wins over the next entry's, and 6.6 pt (v(0.6em)) are added.
+ */
+.twoColumn .entry {
+  display: flow-root;
+  margin: 0 0 calc(var(--sp) * 8.25);
+  padding-block: 0 calc(var(--sp) * 6.6);
+  padding-inline-start: var(--meta-indent);
+}
+
+/* Without a body, its title and company are all there is, and the cell's v(0.2em) comes after them. */
+.twoColumn .entry:not(:has(.bullets, .descriptor, .entrySkills)) {
+  padding-block-end: calc(var(--sp) * 8.8);
+}
+
+.twoColumn .entryHead {
+  display: block;
+}
+
+/* A little wider than the column, so a place that just fits it in Typst doesn't wrap here. */
+.entryMeta {
+  float: inline-start;
+  width: calc(var(--meta-width) + var(--pt) * 0.5);
+  margin-inline-start: calc(var(--meta-indent) * -1);
+  text-align: start;
+}
+
+.metaDates {
+  display: block;
+  font-size: calc(var(--pt) * 8.5);
+  font-weight: 700;
+  line-height: calc(var(--pt) * 11.1);
+}
+
+/* 2.2 pt (v(0.2em)) and the date's own paragraph spacing, 6.375 pt, under the dates. */
+.metaPlace {
+  display: block;
+  margin-top: calc(var(--sp) * 8.575);
+  font-size: calc(var(--pt) * 8);
+  line-height: calc(var(--pt) * 10.8);
+  color: var(--doc-muted);
+}
+
+.columnTitle {
+  margin: 0;
+}
+
+.twoColumn .entryTitle {
+  display: block;
+  font-size: calc(var(--pt) * 10.5);
+  font-weight: 700;
+  line-height: calc(var(--pt) * 12.4);
+}
+
+.entryAt {
+  display: block;
+  margin-top: calc(var(--pt) * var(--tc-at-gap));
+  font-size: calc(var(--pt) * 8.5);
+  line-height: calc(var(--pt) * 11.1);
+  color: var(--doc-muted);
+}
+
+.twoColumn .descriptor {
+  margin-top: calc(var(--sp) * 4);
+  font-size: calc(var(--pt) * 8.5);
+  line-height: calc(var(--pt) * 11.1);
+}
+
+/* What follows an entry's title: its bullets, 10.45 pt under the company (8.25 + 2.2), each a line of 9.5 pt text 5.2 pt from the one before. */
+.twoColumn .bullets {
+  margin-top: calc(var(--sp) * 10.45);
+  padding: 0;
+  list-style: none;
+}
+
+.twoColumn .descriptor + .bullets {
+  margin-top: calc(var(--sp) * 6);
+}
+
+.twoColumn .bullets li {
+  position: relative;
+  padding-inline-start: 0.804em;
+}
+
+.twoColumn .bullets li::before {
+  content: "•";
+  position: absolute;
+  inset-inline-start: 0;
+}
+
+.twoColumn .bullets li + li {
+  margin-top: calc(var(--sp) * 5.225);
+}
+
+.twoColumn .entrySkills {
+  margin-top: calc(var(--sp) * 5.2);
+  font-size: calc(var(--pt) * 8.5);
+  line-height: calc(var(--pt) * 11.1);
+}
+
+/*
+ * The template's resume-entry, for education, certifications and what you
+ * add yourself (in Priya's, for roles): the same head, and a body of 9 pt
+ * (9.5 in hers), 9.9 pt under the company (2.2 + 6.6 + 1.1), with 6.6 pt after
+ * it, which wins over the next entry's 8.25 as a block's spacing wins over
+ * paragraph spacing.
+ */
+.twoColumn .entryPlain .bullets {
+  margin-top: calc(var(--sp) * 9.9);
+  font-size: calc(var(--pt) * var(--tc-item-size));
+  line-height: calc(var(--pt) * var(--tc-item-line));
+}
+
+.twoColumn .entryPlain .bullets li + li {
+  margin-top: calc(var(--sp) * var(--tc-item-gap));
+}
+
+.twoColumn .entryPlain:has(.bullets) {
+  margin-bottom: calc(var(--sp) * 6.6);
+  padding-block-end: 0;
+}
+
+/* The details of a certification: small and grey, under the issuer. */
+.twoColumn .entry .muted {
+  margin-top: calc(var(--sp) * 5.5);
+  font-size: calc(var(--pt) * 8.5);
+  line-height: calc(var(--pt) * 11.1);
+}
+
+.twoColumn .summary {
+  margin: 0 0 calc(var(--sp) * 8.25);
+  line-height: var(--line-height);
+}
+
+.twoColumn .publication {
+  margin: 0 0 calc(var(--sp) * 6.75);
+  font-size: calc(var(--pt) * 9);
+  line-height: calc(var(--pt) * 10.89);
+}
+
+/*
+ * Skills and languages: a row each, the group's name in a column of 3 parts
+ * to its skills' 8, 9.9 pt apart (8.25 and the 1.65 of v(0.15em)). Their
+ * lines are 4.25 pt, half their 8.5 pt, apart.
+ */
+.twoColumn .skillLine {
+  break-inside: avoid;
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 8fr);
+  column-gap: calc(var(--pt) * 7.09);
+  margin: 0 0 calc(var(--sp) * 8.25);
+  padding-block: 0 calc(var(--sp) * 1.65);
+  font-size: calc(var(--pt) * 8.5);
+  line-height: calc(var(--pt) * 9.86);
+}
+
+.twoColumn .skillBare {
+  display: block;
+}
+
+.twoColumn .skillLabel {
+  font-weight: 700;
 }
 
 /* ─── Paged preview ────────────────────────────────────────────────────── */
@@ -534,5 +913,19 @@
     width: auto;
     min-height: 0;
     padding: 0;
+  }
+
+  /*
+   * Except the two-column layout's: its photo reaches into the side margins,
+   * and the tails and tops of its lines past the text area, which a margin
+   * would cut off. So the sides are padding, and so is a sliver (--tail,
+   * from printCss) at the top and bottom of every page, and at the top the
+   * height the compact layout's photo reaches up (--raise), which the first
+   * page's top margin is smaller by.
+   */
+  .twoColumn {
+    padding-block: calc(var(--tail) + var(--raise, 0mm)) var(--tail);
+    padding-inline: calc(var(--u) * var(--pad-x));
+    box-decoration-break: clone;
   }
 }

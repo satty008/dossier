@@ -6,11 +6,14 @@ import {
   contrastRatio,
   DENSITIES,
   FIT_LEVELS,
+  hasColumns,
   hasSidebar,
+  layoutDensity,
   printCss,
   readableOnWhite,
   resolveTheme,
   squeeze,
+  TWO_COLUMN_DENSITY,
   unitsToMm,
   withoutSidebar,
 } from "./themes";
@@ -44,6 +47,29 @@ describe("resolveTheme", () => {
     expect(resolveTheme(theme("studio"), "SINGLE")).toMatchObject({ split: false, sidebarEnd: false, tintedSidebar: false });
   });
 
+  it("resolves the two-column layouts: their own spacing, and neither a sidebar nor a timeline", () => {
+    const columns = resolveTheme(theme("default-ram"));
+    expect(columns).toMatchObject({ columns: true, compactRoles: false, split: false, sideHeadings: false, timeline: false, banner: false });
+    expect(columns.density).toBe(TWO_COLUMN_DENSITY);
+    expect(resolveTheme(theme("editorial"))).toMatchObject({ columns: false, compactRoles: false });
+    // Any theme in a two-column layout has it, whatever its density says.
+    expect(resolveTheme({ ...theme("editorial"), layout: "TWO_COLUMN", density: "AIRY" }).density).toBe(TWO_COLUMN_DENSITY);
+    expect(resolveTheme(theme("default-ram"), "SINGLE")).toMatchObject({ columns: false, density: DENSITIES.COMPACT });
+  });
+
+  it("has Ram's and Priya's formats as the two-column layouts, the second with compact roles", () => {
+    expect(theme("default-ram")).toMatchObject({ name: "Ram", builtIn: true, layout: "TWO_COLUMN" });
+    expect(theme("default-priya")).toMatchObject({ name: "Priya", builtIn: true, layout: "TWO_COLUMN_COMPACT" });
+    const priya = resolveTheme(theme("default-priya"));
+    expect(priya).toMatchObject({ columns: true, compactRoles: true, split: false, timeline: false });
+    expect(priya.density).toBe(TWO_COLUMN_DENSITY);
+    expect(resolveTheme(theme("default-priya"), "SINGLE")).toMatchObject({ columns: false, compactRoles: false });
+    expect(hasColumns("TWO_COLUMN")).toBe(true);
+    expect(hasColumns("TWO_COLUMN_COMPACT")).toBe(true);
+    expect(hasColumns("SPLIT")).toBe(false);
+    expect(layoutDensity("TWO_COLUMN_COMPACT", "AIRY")).toBe(TWO_COLUMN_DENSITY);
+  });
+
   it("puts white on dark accents and ink on light ones", () => {
     expect(resolveTheme(theme("signal")).onAccent).toBe("#ffffff");
     expect(resolveTheme({ ...theme("signal"), accent: "#f2c94c" }).onAccent).toBe("#1d1c1a");
@@ -66,6 +92,9 @@ describe("layouts and colours", () => {
     expect(withoutSidebar("SPLIT_END")).toBe("SINGLE");
     expect(withoutSidebar("SIDE_HEADINGS")).toBe("SIDE_HEADINGS");
     expect(hasSidebar("SIDE_HEADINGS")).toBe(false);
+    expect(withoutSidebar("TWO_COLUMN")).toBe("TWO_COLUMN");
+    expect(withoutSidebar("TWO_COLUMN_COMPACT")).toBe("TWO_COLUMN_COMPACT");
+    expect(hasSidebar("TWO_COLUMN")).toBe(false);
   });
 
   it("offers swatches that read as text on white, and tells light colours apart", () => {
@@ -90,9 +119,56 @@ describe("printCss", () => {
     expect(printCss(theme("technical"), "LETTER")).toMatch(/^@page \{ size: 215.9mm 279.4mm; margin: 12.819mm 14.168mm; \}/);
   });
 
+  it("gives the two-column layout margins above and below only, a sliver smaller than the template's 10 mm", () => {
+    // 10 mm (30.48 units) less the 0.9 mm each page gets back as padding; the sides are padding too, so the photo can reach into them.
+    expect(printCss(theme("default-ram"), "A4")).toMatch(
+      /^@page \{ size: 210mm 297mm; margin: 9.101mm 0; \}\n:root \{ --u: 0.328125mm; --tail: 0.9mm; \}\n/,
+    );
+    expect(printCss(theme("default-ram"), "A4", 2)).toContain(`margin: ${Math.round((unitsToMm(squeeze(TWO_COLUMN_DENSITY, 2).paddingY, "A4") - 0.9) * 1000) / 1000}mm 0;`);
+    expect(printCss(theme("editorial"), "A4")).not.toContain("--tail");
+    expect(printCss(theme("default-ram"), "A4")).not.toContain("--raise");
+  });
+
+  it("gives Priya's layout a smaller margin above on the first page's behalf, where its photo reaches up 6.5 mm", () => {
+    // The 9.101 mm above is 6.5 mm less, and the photo's reach is padding on every page instead (--raise), so the text starts where it does.
+    expect(printCss(theme("default-priya"), "A4")).toMatch(
+      /^@page \{ size: 210mm 297mm; margin: 2.601mm 0 9.101mm; \}\n:root \{ --u: 0.328125mm; --tail: 0.9mm; --raise: 6.5mm; \}\n/,
+    );
+    // Never more than the margin it has.
+    expect(printCss(theme("default-priya"), "A4", 4)).toMatch(/margin: [0-9.]+mm 0 [0-9.]+mm;/);
+  });
+
+  it("prints a document drawn in another layout than the theme's with that layout's margins", () => {
+    // A cover letter is always in a single column: the theme's own density, margins all round, and no --tail.
+    const letter = printCss(theme("default-ram"), "A4", 0, "SINGLE");
+    expect(letter).toContain(`margin: ${unitsToMm(DENSITIES.COMPACT.paddingY, "A4")}mm ${unitsToMm(DENSITIES.COMPACT.paddingX, "A4")}mm;`);
+    expect(letter).not.toContain("--tail");
+    expect(printCss(theme("default-priya"), "A4", 0, "SINGLE")).not.toContain("--raise");
+  });
+
   it("converts page units to millimetres", () => {
     expect(unitsToMm(640, "A4")).toBe(210);
     expect(unitsToMm(640, "LETTER")).toBe(215.9);
+  });
+});
+
+describe("the two-column layout's spacing", () => {
+  it("is what its Typst template sets, on A4", () => {
+    // 15 mm at the sides, 10 mm above and below, and 9.5 pt text, where a unit is 210 / 640 mm.
+    expect(unitsToMm(TWO_COLUMN_DENSITY.paddingX, "A4")).toBeCloseTo(15, 1);
+    expect(unitsToMm(TWO_COLUMN_DENSITY.paddingY, "A4")).toBeCloseTo(10, 1);
+    expect((TWO_COLUMN_DENSITY.fontSize * 210 * 72) / (640 * 25.4)).toBeCloseTo(9.5, 1);
+    expect(layoutDensity("TWO_COLUMN", "AIRY")).toBe(TWO_COLUMN_DENSITY);
+    expect(layoutDensity("SINGLE", "AIRY")).toBe(DENSITIES.AIRY);
+  });
+
+  it("is tightened for one page without ever loosening a line", () => {
+    for (let level = 1; level <= FIT_LEVELS; level++) {
+      const squeezed = squeeze(TWO_COLUMN_DENSITY, level);
+      expect(squeezed.lineHeight).toBeLessThanOrEqual(TWO_COLUMN_DENSITY.lineHeight);
+      expect(squeezed.fontSize).toBeLessThanOrEqual(TWO_COLUMN_DENSITY.fontSize);
+      expect(squeezed.gap).toBeLessThan(TWO_COLUMN_DENSITY.gap);
+    }
   });
 });
 

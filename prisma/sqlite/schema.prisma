@@ -271,6 +271,8 @@ enum ThemeFont {
   MANROPE
   WORK_SANS
   SPACE_GROTESK
+  SOURCE_SANS
+  ROBOTO
   PLEX_MONO
   JETBRAINS_MONO
 }
@@ -285,6 +287,12 @@ enum ThemeLayout {
   SPLIT
   /// The same with the sidebar at the end of the line.
   SPLIT_END
+  /// One column of sections, each entry's dates and place in a narrow column
+  /// beside it, and each skill group's name beside its skills.
+  TWO_COLUMN
+  /// The same with every entry, roles included, as compact as an education
+  /// entry, and the photo raised into the page's top margin.
+  TWO_COLUMN_COMPACT
 }
 
 enum ThemeAlign {

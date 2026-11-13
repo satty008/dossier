@@ -37,6 +37,8 @@ describe("ThemeBuilder", () => {
       "Side headings",
       "Sidebar left",
       "Sidebar right",
+      "Two-column entries",
+      "Two-column, compact roles",
     ]);
     expect(within(group("Header")).getByRole("radio", { name: "Left" })).toBeChecked();
     expect(within(group("Header style")).getByRole("radio", { name: "Plain" })).toBeChecked();
@@ -49,6 +51,28 @@ describe("ThemeBuilder", () => {
     ]);
     expect(within(group("Dates")).getByRole("radio", { name: "Beside the title" })).toBeChecked();
     expect(within(group("Spacing")).getByRole("radio", { name: "Regular" })).toBeChecked();
+  });
+
+  it("leaves out what a two-column layout brings itself, and says so", () => {
+    renderBuilder(draftFrom(BUILT_IN_THEMES.find((theme) => theme.id === "default-ram")!));
+    expect(within(group("Layout")).getByRole("radio", { name: "Two-column entries" })).toBeChecked();
+    expect(screen.getByText(/Its header, photo, section titles, dates and spacing come with the layout/)).toBeInTheDocument();
+    for (const name of ["Header", "Header style", "Photo", "Photo position", "Section titles", "Dates", "Spacing"]) {
+      expect(screen.queryByRole("radiogroup", { name })).not.toBeInTheDocument();
+    }
+    // The fonts and the accent stay.
+    expect(within(group("Heading font")).getByRole("radio", { name: "Roboto" })).toBeChecked();
+    expect(within(group("Body font")).getByRole("radio", { name: "Source Sans" })).toBeChecked();
+    expect(within(group("Accent")).getByRole("radio", { name: "#262f99" })).toBeChecked();
+  });
+
+  it("leaves out the same for Priya's two-column layout", () => {
+    renderBuilder(draftFrom(BUILT_IN_THEMES.find((theme) => theme.id === "default-priya")!));
+    expect(within(group("Layout")).getByRole("radio", { name: "Two-column, compact roles" })).toBeChecked();
+    expect(screen.getByText(/Its header, photo, section titles, dates and spacing come with the layout/)).toBeInTheDocument();
+    for (const name of ["Header", "Header style", "Photo", "Photo position", "Section titles", "Dates", "Spacing"]) {
+      expect(screen.queryByRole("radiogroup", { name })).not.toBeInTheDocument();
+    }
   });
 
   it("lists serifs, then sans, then mono", () => {
@@ -67,6 +91,8 @@ describe("ThemeBuilder", () => {
       "Manrope",
       "Work Sans",
       "Space Grotesk",
+      "Source Sans",
+      "Roboto",
       "Plex Mono",
       "JetBrains Mono",
     ]);

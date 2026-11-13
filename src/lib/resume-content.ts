@@ -2,7 +2,7 @@ import type { CustomSectionFormat } from "@/generated/prisma/enums";
 import type { Unit } from "@/lib/application-data";
 import { ageLabel, ENGLISH_LABELS, languagesLine, type DocumentLabels } from "@/lib/document-labels";
 import { keepBold, publicationHref, publicationLink } from "@/lib/citation";
-import { ageOn, formatDateRange, formatMonthYear, paidRoles, resumeCertifications, resumeCustomSections, resumePublications, type Basics, type CustomItem, type ProfileData } from "@/lib/profile";
+import { ageOn, formatBirthDate, formatDateRange, formatMonthYear, paidRoles, resumeCertifications, resumeCustomSections, resumePublications, type Basics, type CustomItem, type ProfileData } from "@/lib/profile";
 import { BUILT_IN_SECTIONS, customKey, type BuiltInSection } from "@/lib/resume-sections";
 import { inEditorOrder, skillsText } from "@/lib/skill-groups";
 import { webHref } from "@/lib/web-link";
@@ -10,13 +10,33 @@ import { webHref } from "@/lib/web-link";
 // What a resume shows, worked out from the profile (the base resume) or from
 // a tailored document's units, so the renderer only has to lay it out.
 
+/** What a contact detail is, for the layouts that mark each with an icon. */
+export type ContactKind = "email" | "phone" | "location" | "website" | "linkedin" | "age";
+export type ContactEntry = { kind: ContactKind; text: string };
+
+/** A personal detail a resume can list apart from the contact details, when the profile fills it in. */
+export type PersonalKind = "dob" | "license" | "residence";
+export type PersonalDetail = {
+  kind: PersonalKind;
+  /** "Date of birth", in the document's language. */
+  label: string;
+  /** "08.11.1989". */
+  value: string;
+};
+
 export type ResumeContent = {
   name: string;
   headline: string;
   /** The profile photo's data URL, or null when the resume has none (#224). */
   photo: string | null;
-  /** Email, phone, "City, Country", website, LinkedIn and "Age N", whichever are filled in. */
+  /** Email, phone, "City, Country", website, LinkedIn, "Age N" and the personal details ("Driving licence: Class B"), whichever are filled in. */
   contacts: string[];
+  /** The same without the personal details, each with what it is. */
+  contactEntries: ContactEntry[];
+  /** The date of birth (when shown), driving licence and residence status that are filled in, each with its label, for the two-column layouts' line under the header. */
+  personal: PersonalDetail[];
+  /** Where the person lives, for the line under the headline of the two-column layout: the street address with the city and country, or just the city and country. */
+  address: string;
   summary: string;
   /** The paid roles. */
   experience: ResumeRole[];
@@ -88,6 +108,8 @@ export type ResumeRole = {
   id: string;
   role: string;
   company: string;
+  /** Where the role was: "City, Country", as written; empty when the profile doesn't say. */
+  location: string;
   /** A line about the company or the role (#257), as written; never tailored. */
   descriptor: string;
   dates: string;
@@ -105,24 +127,51 @@ export type ResumeOptions = {
   showPhoto?: boolean | null;
   /** For "Age N"; defaults to now. */
   today?: Date;
+  /** Dates with their months as digits, as the document's language writes numeric dates ("03/2021 – 08/2026", "03.2021 – 08.2026" in German), for the two-column layouts. */
+  numericDates?: boolean;
 };
 
 /** The separator between contact details on one line. */
 export const CONTACT_SEPARATOR = "  ·  ";
 
-/** Contact details in the order the resume header lists them. */
-export function contactItems(basics: Basics, today = new Date(), labels = ENGLISH_LABELS): string[] {
+/** Contact details in the order the resume header lists them, each with what it is. */
+export function contactEntries(basics: Basics, today = new Date(), labels = ENGLISH_LABELS): ContactEntry[] {
   const age = basics.showAge ? ageOn(basics.dob, today) : null;
-  return [
-    basics.email,
-    basics.phone,
-    [basics.city, basics.country].map((part) => part.trim()).filter(Boolean).join(", "),
-    displayLink(basics.website),
-    displayLink(basics.linkedin),
-    age === null ? "" : ageLabel(age, labels),
-  ]
-    .map((item) => item.trim())
-    .filter(Boolean);
+  const entries: ContactEntry[] = [
+    { kind: "email", text: basics.email },
+    { kind: "phone", text: basics.phone },
+    { kind: "location", text: [basics.city, basics.country].map((part) => part.trim()).filter(Boolean).join(", ") },
+    { kind: "website", text: displayLink(basics.website) },
+    { kind: "linkedin", text: displayLink(basics.linkedin) },
+    { kind: "age", text: age === null ? "" : ageLabel(age, labels) },
+  ];
+  return entries.map(({ kind, text }) => ({ kind, text: text.trim() })).filter(({ text }) => text);
+}
+
+/** The personal details a resume lists, in the document's words: the birth date only if the profile shows it. */
+export function personalDetails(basics: Basics, labels = ENGLISH_LABELS): PersonalDetail[] {
+  const details: PersonalDetail[] = [
+    { kind: "dob", label: labels.dateOfBirth, value: basics.showDob ? formatBirthDate(basics.dob, { locale: labels.locale }) : "" },
+    { kind: "license", label: labels.drivingLicence, value: basics.license },
+    { kind: "residence", label: labels.residenceStatus, value: basics.residence },
+  ];
+  return details.map((detail) => ({ ...detail, value: detail.value.trim() })).filter(({ value }) => value);
+}
+
+/** Contact details in the order the resume header lists them. */
+export const contactItems = (basics: Basics, today = new Date(), labels = ENGLISH_LABELS): string[] =>
+  contactEntries(basics, today, labels).map(({ text }) => text);
+
+/**
+ * "12 Main Street, Springfield, Netherlands": the street address, when there is one, with the city and country
+ * (unless the street address already names the city), or else the city and country.
+ */
+export function addressLine(basics: Basics): string {
+  const street = basics.address.trim();
+  const place = [basics.city, basics.country].map((part) => part.trim()).filter(Boolean);
+  const city = basics.city.trim().toLowerCase();
+  if (street && city && street.toLowerCase().includes(city)) return street;
+  return [street, ...place].filter(Boolean).join(", ");
 }
 
 /** A link as a resume shows it: "https://www.example.com/x/" is "example.com/x". */
@@ -159,17 +208,18 @@ export function sectionsWithContent(content: ResumeContent): string[] {
 /** What the resume shows, with its dates and levels in the words of `labels`. */
 export function resumeContent(
   profile: ProfileData,
-  { units, includeReferences = false, showPhoto, today = new Date() }: ResumeOptions = {},
+  { units, includeReferences = false, showPhoto, today = new Date(), numericDates = false }: ResumeOptions = {},
   labels: DocumentLabels = ENGLISH_LABELS,
 ): ResumeContent {
   const { basics } = profile;
   const skillNames = new Map(profile.skills.map((skill) => [skill.id, skill.name]));
-  const dates = { locale: labels.locale, present: labels.present };
+  const dates = { locale: labels.locale, present: labels.present, numeric: numericDates };
 
   const experience = (entry: ProfileData["experience"][number], bullets: string) => ({
     id: entry.id,
     role: entry.role.trim(),
     company: entry.company.trim(),
+    location: entry.location.trim(),
     descriptor: entry.descriptor.trim(),
     dates: formatDateRange(entry, dates),
     // A tailored text gets the profile's bold back where it keeps the words (#368).
@@ -221,11 +271,15 @@ export function resumeContent(
     href: webHref(item.link),
   });
 
+  const personal = personalDetails(basics, labels);
   const content: ResumeContent = {
     name: basics.name.trim() || "Your name",
     headline: basics.headline.trim(),
     photo: profile.photo && (showPhoto ?? profile.photo.onResumes) ? profile.photo.src : null,
-    contacts: contactItems(basics, today, labels),
+    contacts: [...contactItems(basics, today, labels), ...personal.map(({ label, value }) => `${label}: ${value}`)],
+    contactEntries: contactEntries(basics, today, labels),
+    personal,
+    address: addressLine(basics),
     summary: basics.summary.trim(),
     experience: paidRoles(profile.experience).map((entry) => experience(entry, entry.bullets)),
     volunteering: profile.experience.filter((entry) => entry.volunteering).map((entry) => experience(entry, entry.bullets)),

@@ -43,8 +43,10 @@ function browser(): Promise<Browser> {
   if (!pool.browser) {
     const launching = chromium
       .launch({
-        // Docker gives /dev/shm only 64 MB.
-        args: ["--disable-dev-shm-usage"],
+        // Docker gives /dev/shm only 64 MB. And no hinting: with it, Chromium on Linux rounds each glyph's width to
+        // whole pixels, so a line of small type comes out up to 3% wider than its font says, and wraps where the
+        // preview and the font's own widths don't (the two-column layout's 2.7 cm column for dates and places).
+        args: ["--disable-dev-shm-usage", "--font-render-hinting=none"],
       })
       .then((launched) => {
         // A crashed or closed browser is replaced on the next render.

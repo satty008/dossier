@@ -5,6 +5,7 @@ const fake = vi.hoisted(() => {
   type Handler = () => void;
   const state = {
     launches: 0,
+    launchArgs: [] as string[],
     printing: 0,
     maxPrinting: 0,
     releases: [] as (() => void)[],
@@ -12,8 +13,9 @@ const fake = vi.hoisted(() => {
     disconnect: undefined as Handler | undefined,
     redirected: false,
   };
-  const launch = async () => {
+  const launch = async (options?: { args?: string[] }) => {
     state.launches += 1;
+    state.launchArgs = options?.args ?? [];
     return {
       on: (event: string, handler: Handler) => {
         if (event === "disconnected") state.disconnect = handler;
@@ -75,6 +77,13 @@ describe("renderPdf", () => {
       "continue http://localhost:3000/_next/static/app.css",
       "abort https://fonts.example/font.woff2",
     ]);
+  });
+
+  it("starts Chromium without font hinting, which would round each glyph's width to whole pixels", async () => {
+    const rendering = renderPdf("/print/base");
+    await settle();
+    await rendering;
+    expect(fake.state.launchArgs).toContain("--font-render-hinting=none");
   });
 
   it("refuses to print a page that redirected, rather than print the sign-in page as the document (#328)", async () => {

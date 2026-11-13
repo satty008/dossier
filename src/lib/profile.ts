@@ -31,18 +31,47 @@ type DateFormatOptions = {
   locale?: string;
   /** Word for an ongoing entry. */
   present?: string;
+  /** The month as two digits, written as the locale writes a numeric date ("03.2021", "03/2021"), not as its name. */
+  numeric?: boolean;
 };
 
 /**
+ * The month and year as digits, the way the locale writes a numeric date
+ * without its day: "03.2021" in German ("08.11.1989"), "03/2021" in English,
+ * "03-2021" in Dutch, "2021-03" in Swedish. It takes the locale's numeric date
+ * and drops the day, since the locale's own month-and-year pattern isn't the
+ * one people write (CLDR has German as "03/2021").
+ */
+function numericMonthYear(year: number, month: number, locale: string): string {
+  const parts = new Intl.DateTimeFormat(`${locale}-u-ca-gregory`, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "UTC",
+  }).formatToParts(Date.UTC(year, month - 1, 1));
+  const day = parts.findIndex((part) => part.type === "day");
+  // The day goes with the separator beside it: the one after it, or, when it comes last ("1989/11/08"), the one before.
+  const fieldAfter = parts.slice(day + 1).some((part) => part.type !== "literal");
+  const dropped = fieldAfter ? [day, day + 1] : [day - 1, day];
+  return parts
+    .filter((_, index) => !dropped.includes(index))
+    .map((part) => part.value)
+    .join("")
+    .trim();
+}
+
+/**
  * "Mar 2021", or "2013" without a month, or "" without a year, in the
- * locale's own order and digits ("2021年3月", "سپتامبر ۲۰۲۱").
+ * locale's own order and digits ("2021年3月", "سپتامبر ۲۰۲۱"); "03.2021" in
+ * German and "03/2021" in English when `numeric`.
  */
 export function formatMonthYear(
   year: number | null,
   month: number | null,
-  { locale = "en-US" }: DateFormatOptions = {},
+  { locale = "en-US", numeric = false }: DateFormatOptions = {},
 ): string {
   if (year === null) return "";
+  if (numeric && month !== null) return numericMonthYear(year, month, locale);
   // The profile's dates are Gregorian, even where the locale's calendar isn't (Persian).
   return new Intl.DateTimeFormat(`${locale}-u-ca-gregory`, {
     year: "numeric",
@@ -72,6 +101,8 @@ export const BASICS_FIELDS = [
   "city",
   "country",
   "linkedin",
+  "license",
+  "residence",
   "summary",
 ] as const;
 export type BasicsField = (typeof BASICS_FIELDS)[number];
@@ -79,32 +110,38 @@ export type BasicsField = (typeof BASICS_FIELDS)[number];
 /** The Basics fields a profile needs (#216); the rest are optional, and the section count is "filled/6". */
 export const REQUIRED_BASICS = ["name", "headline", "email", "city", "country", "summary"] as const satisfies readonly BasicsField[];
 
-/** Whether a Basics field is optional: phone, date of birth, address, website and LinkedIn. */
+/** Whether a Basics field is optional: phone, date of birth, address, website, LinkedIn, driving licence and residence status. */
 export const isOptionalBasic = (field: BasicsField) => !(REQUIRED_BASICS as readonly BasicsField[]).includes(field);
 
 // The profile as the editor works with it: plain values (dates of birth as
 // "YYYY-MM-DD"), loaded by loadProfile() in src/lib/profile-data.ts.
 
-export type Basics = Record<BasicsField, string> & { showAge: boolean };
+/**
+ * `showAge` and `showDob` are what resumes show of the date of birth: "Age 34"
+ * and the date itself ("08.11.1989"), each off unless chosen. A driving licence
+ * and a residence status are shown when they're filled in.
+ */
+export type Basics = Record<BasicsField, string> & { showAge: boolean; showDob: boolean };
 
 // The basics are stored in the ProfileField table, one text row per filled-in
-// field: text as typed, the date of birth as "YYYY-MM-DD", showAge as "true".
+// field: text as typed, the date of birth as "YYYY-MM-DD", showAge and
+// showDob as "true".
 
 /** The keys in the ProfileField table. */
-export const PROFILE_KEYS = [...BASICS_FIELDS, "showAge"] as const;
+export const PROFILE_KEYS = [...BASICS_FIELDS, "showAge", "showDob"] as const;
 export type ProfileKey = (typeof PROFILE_KEYS)[number];
 
 /** The basics from ProfileField rows; a missing key is empty, and keys it doesn't know are ignored. */
 export function basicsFromFields(rows: readonly { key: string; value: string }[]): Basics {
   const values = new Map(rows.map((row) => [row.key, row.value]));
   const basics = Object.fromEntries(BASICS_FIELDS.map((field) => [field, values.get(field) ?? ""]));
-  return { ...(basics as Record<BasicsField, string>), showAge: values.get("showAge") === "true" };
+  return { ...(basics as Record<BasicsField, string>), showAge: values.get("showAge") === "true", showDob: values.get("showDob") === "true" };
 }
 
 /** The value to store for each key, or null for an empty one, whose row is removed. */
 export function fieldsFromBasics(basics: Basics): Record<ProfileKey, string | null> {
   const fields = Object.fromEntries(BASICS_FIELDS.map((field) => [field, basics[field] || null]));
-  return { ...(fields as Record<BasicsField, string | null>), showAge: basics.showAge ? "true" : null };
+  return { ...(fields as Record<BasicsField, string | null>), showAge: basics.showAge ? "true" : null, showDob: basics.showDob ? "true" : null };
 }
 
 /** `group` is the group it's printed under on resumes, empty for none (#280). */
@@ -216,6 +253,21 @@ export function resumePublications(publications: readonly PublicationItem[]): Pu
 /** How many required Basics fields have something in them. */
 export function filledBasics(basics: Record<BasicsField, string>): number {
   return REQUIRED_BASICS.filter((field) => basics[field].trim() !== "").length;
+}
+
+/**
+ * A "YYYY-MM-DD" date of birth in the locale's own order and digits
+ * ("08.11.1989" in German, "Nov 8, 1989" in English); "" without a valid one.
+ */
+export function formatBirthDate(dob: string, { locale = "en-US" }: DateFormatOptions = {}): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dob);
+  if (!match) return "";
+  const [year, month, day] = match.slice(1).map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  // A date that rolled over (30 February) isn't one, and a year under 100 isn't read as 19xx.
+  if (year < 1000 || date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return "";
+  // The profile's dates are Gregorian, even where the locale's calendar isn't (Persian).
+  return new Intl.DateTimeFormat(`${locale}-u-ca-gregory`, { dateStyle: "medium", timeZone: "UTC" }).format(date);
 }
 
 /** Age in whole years on `today`, from a "YYYY-MM-DD" date of birth; null without a valid one. */

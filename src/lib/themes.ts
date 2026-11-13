@@ -63,6 +63,10 @@ export const BUILT_IN_THEMES: ThemeData[] = (
     { id: "folio", name: "Folio", headFont: "PLAYFAIR", bodyFont: "LORA", accent: "#1d1c1a", layout: "SIDE_HEADINGS", align: "LEFT", headingStyle: "PLAIN", density: "AIRY", photoShape: "ROUNDED", photoPosition: "HEADER_START" },
     { id: "console", name: "Console", headFont: "JETBRAINS_MONO", bodyFont: "WORK_SANS", accent: "#4a5563", layout: "SPLIT", align: "LEFT", headingStyle: "BAND", density: "COMPACT", sidebarStyle: "TINTED", photoShape: "SQUARE", photoPosition: "SIDEBAR" },
     { id: "atlas", name: "Atlas", headFont: "LIBRE_CASLON", bodyFont: "INTER", accent: "#a14a1f", layout: "SINGLE", align: "CENTER", headingStyle: "CAPS", density: "REGULAR", headerStyle: "BANNER", dateStyle: "TIMELINE", photoPosition: "ABOVE_NAME" },
+    // The two resume formats of the household, from the modern-cv template for Typst: each has its own header, photo, section titles and spacing, set by its layout.
+    // Choosing one as the base theme (Resume → Themes, or Settings → Documents) makes it the default.
+    { id: "default-ram", name: "Ram", headFont: "ROBOTO", bodyFont: "SOURCE_SANS", accent: "#262f99", layout: "TWO_COLUMN", align: "CENTER", headingStyle: "RULE", density: "COMPACT" },
+    { id: "default-priya", name: "Priya", headFont: "ROBOTO", bodyFont: "SOURCE_SANS", accent: "#262f99", layout: "TWO_COLUMN_COMPACT", align: "CENTER", headingStyle: "RULE", density: "COMPACT" },
   ] satisfies (Omit<ThemeData, "builtIn" | StyleField> & Partial<Pick<ThemeData, StyleField>>)[]
 ).map((theme) => ({ ...THEME_STYLE_DEFAULTS, ...theme, builtIn: true }));
 
@@ -96,6 +100,8 @@ export const THEME_FONTS: Record<ThemeFont, { label: string; family: string; ser
   [ThemeFont.MANROPE]: { label: "Manrope", family: "var(--typeface-manrope)", serif: false },
   [ThemeFont.WORK_SANS]: { label: "Work Sans", family: "var(--typeface-work-sans)", serif: false },
   [ThemeFont.SPACE_GROTESK]: { label: "Space Grotesk", family: "var(--typeface-space-grotesk)", serif: false },
+  [ThemeFont.SOURCE_SANS]: { label: "Source Sans", family: "var(--typeface-source-sans)", serif: false },
+  [ThemeFont.ROBOTO]: { label: "Roboto", family: "var(--typeface-roboto)", serif: false },
   [ThemeFont.PLEX_MONO]: { label: "Plex Mono", family: "var(--typeface-plex-mono)", serif: false },
   [ThemeFont.JETBRAINS_MONO]: { label: "JetBrains Mono", family: "var(--typeface-jetbrains-mono)", serif: false },
 };
@@ -184,6 +190,34 @@ export const DENSITIES: Record<
 
 export type DensityMetrics = (typeof DENSITIES)[Density];
 
+/**
+ * What the two-column layouts set themselves, in place of a density: the spacing
+ * of the Typst templates they follow (measured in PDFs it compiled). On A4,
+ * where a unit is 210 / 640 mm, its margins are 15 mm at the sides and 10 mm
+ * above and below, its text 9.5 pt with the 1.21 line height of that
+ * template's lines, and `gap` is the 14.85 pt between two of its entries,
+ * which "Fit to one page" tightens, and with it every other gap of the
+ * layout (document.module.css).
+ */
+export const TWO_COLUMN_DENSITY: DensityMetrics = { label: "Two columns", paddingY: 30.48, paddingX: 45.71, gap: 15.96, fontSize: 10.21, lineHeight: 1.21, itemGap: 15.96 };
+
+/**
+ * How far the tails of a letter reach below its baseline, and the tops of its
+ * tallest letters above its capitals, in the two-column layout's 9.5 pt text,
+ * rounded up, in millimetres (see printCss).
+ */
+const TWO_COLUMN_TAIL_MM = 0.9;
+
+/** How far the compact two-column layout's photo reaches up into the page's top margin: 0.65 cm. */
+const COMPACT_PHOTO_RAISE_MM = 6.5;
+
+/** Whether a layout is one of the two-column ones: with roles in blocks of their own, or with compact roles. */
+export const hasColumns = (layout: ThemeLayout) => layout === ThemeLayout.TWO_COLUMN || layout === ThemeLayout.TWO_COLUMN_COMPACT;
+
+/** The spacing a layout and a density give a document: the two-column layouts' own, or else the density's. */
+export const layoutDensity = (layout: ThemeLayout, density: Density): DensityMetrics =>
+  hasColumns(layout) ? TWO_COLUMN_DENSITY : DENSITIES[density];
+
 /** How many steps "Fit to one page" can take (public issue 69). */
 export const FIT_LEVELS = 4;
 
@@ -207,7 +241,8 @@ export function squeeze(density: DensityMetrics, level: number): DensityMetrics 
     paddingY: Math.max(28, Math.round(density.paddingY * step.paddingY)),
     gap: Math.max(8, Math.round(density.gap * step.gap)),
     itemGap: Math.max(4, Math.round(density.itemGap * step.itemGap)),
-    lineHeight: Math.max(1.35, round(density.lineHeight * step.lineHeight)),
+    // Never above where it started: a layout may set lines tighter than the floor.
+    lineHeight: Math.max(Math.min(1.35, density.lineHeight), round(density.lineHeight * step.lineHeight)),
     fontSize: Math.max(9.25, round(density.fontSize * step.fontSize)),
   };
 }
@@ -217,6 +252,8 @@ export const LAYOUTS: Record<ThemeLayout, { label: string }> = {
   [ThemeLayout.SIDE_HEADINGS]: { label: "Side headings" },
   [ThemeLayout.SPLIT]: { label: "Sidebar left" },
   [ThemeLayout.SPLIT_END]: { label: "Sidebar right" },
+  [ThemeLayout.TWO_COLUMN]: { label: "Two-column entries" },
+  [ThemeLayout.TWO_COLUMN_COMPACT]: { label: "Two-column, compact roles" },
 };
 
 /** Whether a layout has a sidebar. */
@@ -293,6 +330,10 @@ export function resolveTheme(theme: ThemeData, layout: ThemeLayout = theme.layou
     sidebarEnd: layout === ThemeLayout.SPLIT_END,
     tintedSidebar: split && theme.sidebarStyle === SidebarStyle.TINTED,
     sideHeadings: layout === ThemeLayout.SIDE_HEADINGS,
+    /** The two-column layouts: dates and places, and skill groups' names, in a column of their own beside the text. */
+    columns: hasColumns(layout),
+    /** Of those, the one whose roles are as compact as education entries, and whose education entries are the roomy ones. */
+    compactRoles: layout === ThemeLayout.TWO_COLUMN_COMPACT,
     // Sidebar layouts always align the header left.
     centered: !split && theme.align === ThemeAlign.CENTER,
     banner: theme.headerStyle === HeaderStyle.BANNER,
@@ -308,7 +349,7 @@ export function resolveTheme(theme: ThemeData, layout: ThemeLayout = theme.layou
     /** Text on the accent, e.g. in a banner: white, or ink when that reads better. */
     onAccent: contrastRatio(theme.accent, "#ffffff") >= contrastRatio(theme.accent, INK) ? "#ffffff" : INK,
     heading: HEADING_STYLES[theme.headingStyle],
-    density: squeeze(DENSITIES[theme.density], fit),
+    density: squeeze(layoutDensity(layout, theme.density), fit),
     name: serifHeading ? { size: 30, weight: 500 } : { size: 25, weight: 600 },
   };
 }
@@ -322,14 +363,29 @@ export function unitsToMm(units: number, paper: PaperSize): number {
 /**
  * CSS for printing a document: the paper size, the theme's page padding as
  * page margins (so every page gets it, not just the first and last), and the
- * unit size for that paper. Rendered by the print route (E5-5).
+ * unit size for that paper. Rendered by the print route (E5-5). `layout` is
+ * the one the document is drawn in, where it isn't the theme's: a cover letter
+ * is always in a single column.
  */
-export function printCss(theme: ThemeData, paper: PaperSize, fit = 0): string {
+export function printCss(theme: ThemeData, paper: PaperSize, fit = 0, layout: ThemeLayout = theme.layout): string {
   const { widthMm, heightMm } = PAPER_SIZES[paper];
-  const { paddingY, paddingX } = squeeze(DENSITIES[theme.density], fit);
+  const { paddingY, paddingX } = squeeze(layoutDensity(layout, theme.density), fit);
+  // Chromium cuts what reaches into a page margin. The two-column layouts measure a line of text from its capitals
+  // down to the baseline, so the tails of a last line's letters reach below the text area, the tops of a first
+  // line's above it (and into the page before, where they're painted), and the photo reaches into the side margin
+  // (and, in the compact layout, the top one). So its page has padding at the sides and at the top and bottom of
+  // each page (document.module.css), and margins that much smaller, which leaves the text area the size of the template's.
+  const columns = hasColumns(layout);
+  const round = (value: number) => Math.round(value * 1000) / 1000;
+  const tail = columns ? TWO_COLUMN_TAIL_MM : 0;
+  const around = round(unitsToMm(paddingY, paper) - tail);
+  // The photo's reach into the top margin is padding on every page, so the text starts where it does, and a margin less on the first.
+  const raise = layout === ThemeLayout.TWO_COLUMN_COMPACT ? Math.min(COMPACT_PHOTO_RAISE_MM, around) : 0;
+  const sides = columns ? "0" : `${unitsToMm(paddingX, paper)}mm`;
+  const margin = raise > 0 ? `${round(around - raise)}mm ${sides} ${around}mm` : `${around}mm ${sides}`;
   return [
-    `@page { size: ${widthMm}mm ${heightMm}mm; margin: ${unitsToMm(paddingY, paper)}mm ${unitsToMm(paddingX, paper)}mm; }`,
-    `:root { --u: ${widthMm / PAGE_WIDTH}mm; }`,
+    `@page { size: ${widthMm}mm ${heightMm}mm; margin: ${margin}; }`,
+    `:root { --u: ${widthMm / PAGE_WIDTH}mm;${columns ? ` --tail: ${tail}mm;` : ""}${raise > 0 ? ` --raise: ${raise}mm;` : ""} }`,
     // White edge to edge, and the dev server's badge stays off the paper.
     "html, body { background: #fff; }",
     "@media print { nextjs-portal { display: none; } }",

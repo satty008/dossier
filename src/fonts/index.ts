@@ -197,6 +197,31 @@ export const spaceGrotesk = localFont({
   preload: false,
 });
 
+export const sourceSans = localFont({
+  src: [
+    { path: "./source-sans-3/SourceSans3-Regular.woff2", weight: "400" },
+    { path: "./source-sans-3/SourceSans3-Medium.woff2", weight: "500" },
+    { path: "./source-sans-3/SourceSans3-SemiBold.woff2", weight: "600" },
+    { path: "./source-sans-3/SourceSans3-Bold.woff2", weight: "700" },
+  ],
+  variable: "--typeface-source-sans",
+  fallback: ["Helvetica", "Arial", "sans-serif"],
+  preload: false,
+});
+
+/** Thin for the Two column theme's first name, Bold for its last name; the other weights serve a custom theme. */
+export const roboto = localFont({
+  src: [
+    { path: "./roboto/Roboto-Thin.woff2", weight: "100" },
+    { path: "./roboto/Roboto-Regular.woff2", weight: "400" },
+    { path: "./roboto/Roboto-Medium.woff2", weight: "500" },
+    { path: "./roboto/Roboto-Bold.woff2", weight: "700" },
+  ],
+  variable: "--typeface-roboto",
+  fallback: ["Helvetica", "Arial", "sans-serif"],
+  preload: false,
+});
+
 export const jetbrainsMono = localFont({
   src: [
     { path: "./jetbrains-mono/JetBrainsMono-Regular.woff2", weight: "400" },
@@ -328,6 +353,8 @@ export const fontVariables = [
   manrope,
   workSans,
   spaceGrotesk,
+  sourceSans,
+  roboto,
   jetbrainsMono,
   greekSerif,
   greekSans,

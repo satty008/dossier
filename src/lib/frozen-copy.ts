@@ -51,6 +51,7 @@ const frozenProfileSchema = z.object({
   basics: z.record(z.string(), z.unknown()).transform((raw): Basics => ({
     ...(Object.fromEntries(BASICS_FIELDS.map((field) => [field, typeof raw[field] === "string" ? raw[field] : ""])) as Record<(typeof BASICS_FIELDS)[number], string>),
     showAge: raw.showAge === true,
+    showDob: raw.showDob === true,
   })),
   skills: list(z.object({ id: z.string(), name: text, group: text })),
   languages: list(z.object({ id: z.string(), name: text, level: z.enum(LanguageLevel) })),
