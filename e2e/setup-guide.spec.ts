@@ -22,6 +22,9 @@ const freshInstall = async () => {
 };
 
 test("opens by itself on a fresh install and walks through every step", async ({ page }) => {
+  // The footer's link is the same element from one step to the next, "Continue →" on one and "Skip this step →" on another, and its
+  // colours take 150 ms to change: a check that lands in between sees them half way (3.3:1). Without motion they change at once.
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await freshInstall();
   await page.goto("/");
   await expect(page).toHaveURL("/welcome");
