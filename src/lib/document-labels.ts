@@ -116,7 +116,8 @@ const WORDS: Record<string, Words> = {
     languages: "Sprachen",
     contact: "Kontakt",
     references: "Referenzen",
-    present: "Heute",
+    // Lower case, as a date range reads in German: "08.2026 – heute".
+    present: "heute",
     validUntil: (date) => `Gültig bis ${date}`,
     credentialId: "Zertifikats-ID",
     age: (years) => `${years} Jahre`,

@@ -93,7 +93,7 @@ describe("ResumeDocument", () => {
     const withAge = { ...profile, basics: { ...profile.basics, showAge: true } };
     render(<ResumeDocument theme={theme("modern")} profile={withAge} paper="A4" today={today} language="German" includeReferences />);
     expect(sectionTitles()).toEqual(["Kontakt", "Kenntnisse", "Sprachen", "Profil", "Berufserfahrung", "Projekte", "Ausbildung", "Zertifizierungen", "Publikationen", "Referenzen"]);
-    expect(screen.getByText("März 2021 – Heute")).toBeInTheDocument();
+    expect(screen.getByText("März 2021 – heute")).toBeInTheDocument();
     expect(screen.getByText("UX Designer").closest("[data-unit]")).toHaveTextContent("Kenntnisse · HTML & CSS, Interaction design");
     expect(screen.getByText(/^Dutch: Muttersprache · English: Fließend \(C2\)/)).toBeInTheDocument();
     expect(screen.getByText("34 Jahre")).toBeInTheDocument();
@@ -612,6 +612,15 @@ describe("the two-column layouts", () => {
     expect(rows.map((row) => row.textContent)).toEqual(["DutchNative", "EnglishFluent (C2)", "GermanIntermediate (B1)"]);
   });
 
+  it("lets a long name wrap after its slashes, not inside a word, and leaves the text as it is", () => {
+    const named = grouped.languages.map((language, index) => (index === 0 ? { ...language, name: "Nordic (Danish/Norwegian/Swedish)" } : language));
+    draw({ profile: { ...grouped, languages: named } });
+    const [long, short] = [...document.querySelectorAll('[data-unit="languages"] strong')];
+    expect(long).toHaveTextContent("Nordic (Danish/Norwegian/Swedish)");
+    expect(long.querySelectorAll("wbr")).toHaveLength(2);
+    expect(short.querySelectorAll("wbr")).toHaveLength(0);
+  });
+
   it("draws a tailored resume the same way, from its units", () => {
     draw({ units: demoResumeUnits(), profile: { ...grouped, photo: null } });
     const role = document.querySelector("[data-unit='experience:e1']")!;
@@ -636,7 +645,7 @@ describe("the two-column layouts", () => {
     draw({ language: "German" });
     expect(sectionTitles()).toEqual(["Profil", "Berufserfahrung", "Projekte", "Ausbildung", "Zertifizierungen", "Publikationen", "Kenntnisse", "Sprachen"]);
     // German writes its dates with dots, not slashes.
-    expect(screen.getByText("03.2021 – Heute")).toBeInTheDocument();
+    expect(screen.getByText("03.2021 – heute")).toBeInTheDocument();
     expect(screen.getByText("34 Jahre")).toBeInTheDocument();
   });
 

@@ -155,6 +155,20 @@ export function ColumnEntryHead({ title, at, dates, place }: { title: string; at
 }
 
 /**
+ * A name that can wrap after a slash, so a long "Hindi/Bengali/Tamil" in the
+ * narrow column breaks between the names, not inside one. The text is the same.
+ */
+function wrapAfterSlashes(name: string): ReactNode {
+  const parts = name.split("/");
+  return parts.map((part, index) => (
+    <Fragment key={index}>
+      {index < parts.length - 1 ? `${part}/` : part}
+      {index < parts.length - 1 && <wbr />}
+    </Fragment>
+  ));
+}
+
+/**
  * Lines of "Group: Skill · Skill" as rows of two: the group's name, then its
  * skills with commas between them. A line without a group's name is as wide
  * as both. `separator` is what splits the text into lines: a new line for
@@ -170,7 +184,7 @@ export function SkillRows({ text, separator = "\n" }: { text: string; separator?
       const items = skills.replaceAll(" · ", ", ");
       return label ? (
         <p key={index} className={styles.skillLine}>
-          <strong className={styles.skillLabel}>{label}</strong>
+          <strong className={styles.skillLabel}>{wrapAfterSlashes(label)}</strong>
           <span className={styles.skillItems}>{items}</span>
         </p>
       ) : (

@@ -124,9 +124,9 @@ describe("resumeContent's dates", () => {
   it("write them with dots in German, 03.2021 – 08.2026, and the same way in the certifications and their expiry", () => {
     const german = documentLabels("German");
     const content = resumeContent(profile, { today, numericDates: true }, german);
-    expect(content.experience[0].dates).toBe("03.2021 – Heute");
-    expect(content.experience.map((role) => role.dates)).toEqual(["03.2021 – Heute", "06.2018 – 02.2021", "09.2015 – 05.2018"]);
-    expect(content.projects[0].dates).toBe("01.2023 – Heute");
+    expect(content.experience[0].dates).toBe("03.2021 – heute");
+    expect(content.experience.map((role) => role.dates)).toEqual(["03.2021 – heute", "06.2018 – 02.2021", "09.2015 – 05.2018"]);
+    expect(content.projects[0].dates).toBe("01.2023 – heute");
     expect(content.education.map((entry) => entry.dates)).toEqual(["2013 – 2015", "2010 – 2013"]);
     expect(content.certifications[0].date).toBe("06.2022");
     expect(content.certifications[0].details[0]).toBe("Gültig bis 06.2028");
