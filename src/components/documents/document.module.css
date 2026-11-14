@@ -676,6 +676,19 @@
 }
 
 /*
+ * A section with no title (Priya's German Profile): the template's heading with nothing in it, which
+ * is a 1 pt rule across the line, with the same 19.8 pt above it and 8.25 pt below as a title has.
+ */
+.twoColumn .sectionRule {
+  height: 0;
+  margin: calc(var(--sp) * 20.8) 0 calc(var(--sp) * 8.25);
+  padding: 0;
+  border: 0;
+  border-top: calc(var(--pt) * 1) solid #000;
+  translate: 0 calc(var(--pt) * 0.25);
+}
+
+/*
  * An entry, the template's work-entry: its dates and place float into the
  * column before its text, as in a timeline. Below it, 8.25 pt of paragraph
  * spacing wins over the next entry's, and 6.6 pt (v(0.6em)) are added.

@@ -94,8 +94,9 @@ test("prints every built-in theme with real, embedded text, never Type 3 fonts",
   await sql(`UPDATE "Setting" SET value = 'editorial' WHERE key = 'baseThemeId'`);
 });
 
-// The Ram and Priya themes, which follow the modern-cv Typst templates, bring their own fonts.
-for (const [id, name] of [["default-ram", "Ram"], ["default-priya", "Priya"]]) {
+// The Ram and Priya themes, which follow the modern-cv Typst templates, bring their own fonts; each has a German format of the same look.
+const HOUSEHOLD_FORMATS = [["default-ram", "Ram"], ["default-ram-de", "Ram DE"], ["default-priya", "Priya"], ["default-priya-de", "Priya DE"]];
+for (const [id, name] of HOUSEHOLD_FORMATS) {
   test(`prints the ${name} theme in Source Sans and Roboto`, async ({ page }) => {
     await sql(`INSERT INTO "Setting" (key, value, "updatedAt") VALUES ('baseThemeId', $1, now()) ON CONFLICT (key) DO UPDATE SET value = $1`, [id]);
     try {
@@ -112,7 +113,7 @@ for (const [id, name] of [["default-ram", "Ram"], ["default-priya", "Priya"]]) {
 }
 
 // Their photo is in the top corner, a little into the margin (Priya's also up into the top one), and in the PDF.
-for (const [id, name] of [["default-ram", "Ram"], ["default-priya", "Priya"]]) {
+for (const [id, name] of HOUSEHOLD_FORMATS) {
   test(`puts the ${name} theme's photo in the corner, over the margin, in the preview and the PDF`, async ({ page }) => {
     await photoInTheCorner(page, id);
   });
@@ -148,7 +149,7 @@ test("chooses the default resume format in Settings → Documents", async ({ pag
     await page.goto("/settings?section=documents");
     const format = page.getByLabel("Default resume format");
     await expect(format).toHaveValue("editorial");
-    expect(await format.locator("option").allTextContents()).toEqual(expect.arrayContaining(["Ram", "Priya"]));
+    expect(await format.locator("option").allTextContents()).toEqual(expect.arrayContaining(["Ram", "Ram DE", "Priya", "Priya DE"]));
 
     await format.selectOption({ label: "Priya" });
     await expect.poll(saved).toBe("default-priya");
@@ -162,6 +163,63 @@ test("chooses the default resume format in Settings → Documents", async ({ pag
     await page.goto("/settings?section=documents");
     await expect(page.getByLabel("Default resume format")).toHaveValue("default-ram");
   } finally {
+    await sql(`UPDATE "Setting" SET value = 'editorial' WHERE key = 'baseThemeId'`);
+  }
+});
+
+// The formats come in English and German: choosing one sets the base resume's language, in Settings → Documents and in Resume → Themes alike.
+test("sets the base resume's language with the format: German for Ram DE and Priya DE, English for Ram and Priya", async ({ page }) => {
+  const saved = (key: string) => sql<{ value: string }>(`SELECT value FROM "Setting" WHERE key = $1`, [key]).then((rows) => rows[0]?.value);
+  try {
+    await page.goto("/settings?section=documents");
+    await expect(page.getByLabel("Base resume language")).toHaveValue("English");
+    await page.getByLabel("Default resume format").selectOption({ label: "Ram DE" });
+    await expect(page.getByLabel("Base resume language")).toHaveValue("German");
+    await expect.poll(() => saved("baseThemeId")).toBe("default-ram-de");
+    await expect.poll(() => saved("resumeLanguage")).toBe("German");
+
+    await page.goto("/resume");
+    const resume = page.getByRole("article", { name: "Resume" });
+    await expect(resume).toHaveAttribute("lang", "de");
+    await expect(resume.getByRole("heading", { level: 2, name: "Berufserfahrung" })).toBeVisible();
+    await expect(resume.getByRole("heading", { level: 2, name: "Experience" })).toHaveCount(0);
+
+    // Resume → Themes sets it too, and back to English with Ram.
+    await page.getByRole("button", { name: "Ram theme" }).click();
+    await expect(resume.getByRole("heading", { level: 2, name: "Experience" })).toBeVisible();
+    await expect.poll(() => saved("resumeLanguage")).toBeUndefined();
+    await page.getByRole("button", { name: "Priya DE theme" }).click();
+    await expect(resume.getByRole("heading", { level: 2, name: "Berufserfahrung" })).toBeVisible();
+    await expect.poll(() => saved("resumeLanguage")).toBe("German");
+    await page.goto("/settings?section=documents");
+    await expect(page.getByLabel("Default resume format")).toHaveValue("default-priya-de");
+    await expect(page.getByLabel("Base resume language")).toHaveValue("German");
+  } finally {
+    await sql(`DELETE FROM "Setting" WHERE key = 'resumeLanguage'`);
+    await sql(`UPDATE "Setting" SET value = 'editorial' WHERE key = 'baseThemeId'`);
+  }
+});
+
+// Priya's German template has no title over its Profile, only the rule: her German format leaves it out, Ram's keeps it.
+test("leaves Priya DE's Profile without a title, only the rule, in the preview and the PDF", async ({ page }) => {
+  const setFormat = (id: string) =>
+    sql(`INSERT INTO "Setting" (key, value, "updatedAt") VALUES ('baseThemeId', $1, now()) ON CONFLICT (key) DO UPDATE SET value = $1`, [id]);
+  try {
+    await sql(`INSERT INTO "Setting" (key, value, "updatedAt") VALUES ('resumeLanguage', 'German', now()) ON CONFLICT (key) DO UPDATE SET value = 'German'`);
+    await setFormat("default-priya-de");
+    await page.goto("/resume");
+    const resume = page.getByRole("article", { name: "Resume" });
+    await expect(resume.getByRole("heading", { level: 2, name: "Berufserfahrung" })).toBeVisible();
+    await expect(resume.getByRole("heading", { level: 2, name: "Profil" })).toHaveCount(0);
+    await expect(resume.locator("hr")).toHaveCount(1);
+    expect((await page.request.get("/api/pdf?doc=base")).ok()).toBe(true);
+
+    await setFormat("default-priya");
+    await page.goto("/resume");
+    await expect(resume.getByRole("heading", { level: 2, name: "Profil" })).toBeVisible();
+    await expect(resume.locator("hr")).toHaveCount(0);
+  } finally {
+    await sql(`DELETE FROM "Setting" WHERE key = 'resumeLanguage'`);
     await sql(`UPDATE "Setting" SET value = 'editorial' WHERE key = 'baseThemeId'`);
   }
 });

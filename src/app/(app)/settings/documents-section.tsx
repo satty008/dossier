@@ -13,7 +13,7 @@ import { DocumentKind, type DateFormat, type PaperSize, type Tone } from "@/gene
 import { DOCUMENT_LANGUAGES } from "@/lib/document-language";
 import { FILE_NAME_TOKENS, resolveFileName } from "@/lib/file-name";
 import { DATE_FORMATS, DOCUMENTS_TO_WRITE, DOCUMENTS_TO_WRITE_LABELS, type DocumentsToWrite } from "@/lib/settings";
-import { PAPER_SIZES } from "@/lib/themes";
+import { formatLanguage, PAPER_SIZES } from "@/lib/themes";
 import { TONES } from "@/lib/tones";
 import { useAutosave } from "@/hooks/use-autosave";
 
@@ -68,12 +68,14 @@ export function DocumentsSection({
     });
   };
 
-  // The default format is the base resume theme, which Resume → Themes sets too.
+  // The default format is the base resume theme, which Resume → Themes sets too. Ram and Priya come in English and German:
+  // choosing one sets the base resume's language as well, as the server saves it.
   const changeFormat = (baseThemeId: string) => {
-    const previous = settings.baseThemeId;
-    setSettings({ ...settings, baseThemeId });
+    const previous = { baseThemeId: settings.baseThemeId, resumeLanguage: settings.resumeLanguage };
+    const language = formatLanguage(baseThemeId);
+    setSettings({ ...settings, baseThemeId, ...(language !== undefined && { resumeLanguage: language }) });
     void track(setBaseTheme({ id: baseThemeId })).then((result) => {
-      if (!toastResult(result).ok) setSettings((current) => ({ ...current, baseThemeId: previous }));
+      if (!toastResult(result).ok) setSettings((current) => ({ ...current, ...previous }));
     });
   };
 
@@ -116,7 +118,7 @@ export function DocumentsSection({
       <Card padding="none" className="grid gap-x-[18px] gap-y-5 px-7 py-[26px] sm:grid-cols-2">
         <Select
           label="Default resume format"
-          hint="The base resume and every new application start in this theme. Ram and Priya are the two-column formats; Resume → Themes shows them all."
+          hint="The base resume and every new application start in this theme. Ram and Priya are the two-column formats, each in English and German (DE): choosing one sets the base resume language below to match. Resume → Themes shows them all."
           value={settings.baseThemeId}
           onChange={(event) => changeFormat(event.target.value)}
           className="sm:col-span-2"
@@ -208,7 +210,7 @@ export function DocumentsSection({
         </div>
         <Select
           label="Base resume language"
-          hint="For its headings and dates. Tailored documents use their application's language."
+          hint="For its headings and dates. Choosing Ram, Ram DE, Priya or Priya DE as the default format sets it. Tailored documents use their application's language."
           value={settings.resumeLanguage ?? "English"}
           onChange={(event) => change({ resumeLanguage: event.target.value === "English" ? null : event.target.value })}
         >

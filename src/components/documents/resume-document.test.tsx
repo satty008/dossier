@@ -741,3 +741,55 @@ describe("Priya's two-column layout", () => {
     expect(screen.getByRole("img", { name: "Jane Doe" }).className).toMatch(/photoCorner/);
   });
 });
+
+describe("Priya DE", () => {
+  const draw = (extra: Partial<Parameters<typeof ResumeDocument>[0]> = {}) =>
+    render(<ResumeDocument theme={theme("default-priya-de")} profile={profile} paper="A4" today={today} language="German" {...extra} />);
+
+  it("has only a rule over the Profile, as her German template has, and no heading for it", () => {
+    const { container } = draw();
+    expect(sectionTitles()).toEqual(["Berufserfahrung", "Projekte", "Ausbildung", "Zertifizierungen", "Publikationen", "Kenntnisse", "Sprachen"]);
+    const rule = container.querySelector("hr")!;
+    expect(rule.className).toMatch(/sectionRule/);
+    expect(rule.parentElement!.querySelector("[data-unit='summary']")).toHaveTextContent(profile.basics.summary);
+    // The first thing in its section, like a heading, and the only one in the page.
+    expect(rule.parentElement!.firstElementChild).toBe(rule);
+    expect(container.querySelectorAll("hr")).toHaveLength(1);
+  });
+
+  it("is a two-column page with compact roles, like Priya's", () => {
+    const { container } = draw();
+    expect(container.innerHTML).toMatch(/twoColumnCompact/);
+    expect(document.querySelector("[data-unit='experience:e1']")!.className).toMatch(/entryPlain/);
+  });
+
+  it("gives the Profile its title when this resume names it", () => {
+    const { container } = draw({ sections: { order: [], off: [], titles: { summary: "Über mich" } } });
+    expect(sectionTitles()[0]).toBe("Über mich");
+    expect(container.querySelector("hr")).toBeNull();
+  });
+
+  it("leaves nothing of the Profile when it's off or empty", () => {
+    const { container, unmount } = draw({ sections: { order: [], off: ["summary"] } });
+    expect(container.querySelector("hr")).toBeNull();
+    expect(container.querySelector("[data-unit='summary']")).toBeNull();
+    unmount();
+    const empty = render(<ResumeDocument theme={theme("default-priya-de")} profile={{ ...profile, basics: { ...profile.basics, summary: "" } }} paper="A4" today={today} language="German" />);
+    expect(empty.container.querySelector("hr")).toBeNull();
+  });
+
+  it("is the only German format, and the only two-column one, that does this: the others keep the Profile's heading", () => {
+    for (const id of ["default-priya", "default-ram", "default-ram-de"]) {
+      const { container, unmount } = render(<ResumeDocument theme={theme(id)} profile={profile} paper="A4" today={today} language="German" />);
+      expect(sectionTitles()[0], id).toBe("Profil");
+      expect(container.querySelector("hr"), id).toBeNull();
+      unmount();
+    }
+  });
+
+  it("keeps the heading in a single column, which has no such rule", () => {
+    const { container } = draw({ layout: "SINGLE" });
+    expect(sectionTitles()[0]).toBe("Profil");
+    expect(container.querySelector("hr")).toBeNull();
+  });
+});

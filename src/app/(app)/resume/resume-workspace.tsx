@@ -17,7 +17,7 @@ import type { ProfileData } from "@/lib/profile";
 import { saveFile } from "@/lib/save-file";
 import type { SectionLayout } from "@/lib/resume-sections";
 import { parseThemeFile, themeFile, themeFileName } from "@/lib/theme-file";
-import { FIT_LEVELS, hasSidebar, PAPER_SIZES, type ThemeData } from "@/lib/themes";
+import { FIT_LEVELS, formatLanguage, hasSidebar, PAPER_SIZES, type ThemeData } from "@/lib/themes";
 
 import { deleteTheme, duplicateTheme, importTheme, saveResumeSections, saveTheme, setBaseTheme, setFitBaseResume } from "./actions";
 import { SectionsPanel } from "./sections-panel";
@@ -57,7 +57,7 @@ export function ResumeWorkspace({
   baseThemeId,
   paper,
   includeReferences,
-  language,
+  language: initialLanguage,
   sections: initialSections,
   fitToPage: initialFit,
   initialPanel = "themes",
@@ -69,6 +69,8 @@ export function ResumeWorkspace({
   const [fit, setFit] = useState(0);
   const [pages, setPages] = useState(1);
   const [baseId, setBaseId] = useState(baseThemeId);
+  // The base resume's language: a format of Ram's or Priya's, English or German, sets it when it's picked.
+  const [language, setLanguage] = useState(initialLanguage);
   const [panel, setPanel] = useState<Panel>(initialPanel);
   const [sections, setSections] = useState(initialSections);
   const [draft, setDraft] = useState<ThemeDraft | null>(null);
@@ -78,6 +80,7 @@ export function ResumeWorkspace({
   // and the last one picked, so an older failure doesn't undo a newer pick.
   const savedId = useRef(baseThemeId);
   const pickedId = useRef(baseThemeId);
+  const savedLanguage = useRef(initialLanguage);
   // The same for the sections' order.
   const savedSections = useRef(initialSections);
   const latestSections = useRef(initialSections);
@@ -132,9 +135,17 @@ export function ResumeWorkspace({
     if (id === baseId) return;
     setBaseId(id);
     pickedId.current = id;
+    // The preview follows the format's language at once, as the server saves it with the theme.
+    const preset = formatLanguage(id);
+    if (preset !== undefined) setLanguage(preset);
     const result = toastResult(await setBaseTheme({ id }));
-    if (result.ok) savedId.current = id;
-    else if (pickedId.current === id) setBaseId(savedId.current);
+    if (result.ok) {
+      savedId.current = id;
+      if (preset !== undefined) savedLanguage.current = preset;
+    } else if (pickedId.current === id) {
+      setBaseId(savedId.current);
+      setLanguage(savedLanguage.current);
+    }
   };
 
   const changeSections = async (next: SectionLayout) => {

@@ -110,11 +110,11 @@ export const plainUnit: UnitRenderer = ({ id, className, head, children }) => (
   </div>
 );
 
-/** A section with a themed title. */
-export function DocumentSection({ title, children }: { title: string; children: ReactNode }) {
+/** A section with a themed title, or, when `untitled`, only the rule where the title would be (the two-column formats). */
+export function DocumentSection({ title, untitled = false, children }: { title: string; untitled?: boolean; children: ReactNode }) {
   return (
     <section className={styles.section}>
-      <h2 className={styles.sectionTitle}>{title}</h2>
+      {untitled ? <hr className={styles.sectionRule} /> : <h2 className={styles.sectionTitle}>{title}</h2>}
       {children}
     </section>
   );

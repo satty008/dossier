@@ -31,7 +31,9 @@ const preview = { name: "Jane Doe", company: "Ledgerly", role: "Senior Product D
 const themes = [
   { id: "editorial", name: "Editorial", builtIn: true },
   { id: "default-ram", name: "Ram", builtIn: true },
+  { id: "default-ram-de", name: "Ram DE", builtIn: true },
   { id: "default-priya", name: "Priya", builtIn: true },
+  { id: "default-priya-de", name: "Priya DE", builtIn: true },
   { id: "c1", name: "Mine", builtIn: false },
 ];
 const open = () => render(<DocumentsSection initial={initial} themes={themes} preview={preview} />);
@@ -60,7 +62,7 @@ describe("Documents settings (E10-3)", () => {
     open();
     const select = screen.getByLabelText("Default resume format") as HTMLSelectElement;
     expect(select).toHaveDisplayValue("Ram");
-    expect([...select.options].map((option) => option.text)).toEqual(["Editorial", "Ram", "Priya", "Mine"]);
+    expect([...select.options].map((option) => option.text)).toEqual(["Editorial", "Ram", "Ram DE", "Priya", "Priya DE", "Mine"]);
     expect([...select.querySelectorAll("optgroup")].map((group) => group.label)).toEqual(["Built-in", "Your themes"]);
     await user.selectOptions(select, "Priya");
     expect(setBaseTheme).toHaveBeenLastCalledWith({ id: "default-priya" });
@@ -78,6 +80,34 @@ describe("Documents settings (E10-3)", () => {
     const select = screen.getByLabelText("Default resume format");
     await user.selectOptions(select, "Priya");
     expect(select).toHaveDisplayValue("Ram");
+  });
+
+  it("sets the base resume language with the format: German for Ram DE and Priya DE, English for Ram and Priya, and nothing for the others", async () => {
+    const user = userEvent.setup();
+    open();
+    const format = screen.getByLabelText("Default resume format");
+    const language = screen.getByLabelText("Base resume language");
+    expect(language).toHaveDisplayValue("English");
+    await user.selectOptions(format, "Ram DE");
+    expect(setBaseTheme).toHaveBeenLastCalledWith({ id: "default-ram-de" });
+    expect(language).toHaveDisplayValue("German");
+    await user.selectOptions(format, "Mine");
+    expect(language).toHaveDisplayValue("German");
+    await user.selectOptions(format, "Priya");
+    expect(language).toHaveDisplayValue("English");
+    await user.selectOptions(format, "Priya DE");
+    expect(language).toHaveDisplayValue("German");
+    // The server saves the language with the theme, so this isn't a separate setting to save.
+    expect(updateSettings).not.toHaveBeenCalled();
+  });
+
+  it("puts the language back too when the format can't be saved", async () => {
+    const user = userEvent.setup();
+    vi.mocked(setBaseTheme).mockResolvedValueOnce({ ok: false, error: "That theme doesn't exist anymore." } as never);
+    open();
+    await user.selectOptions(screen.getByLabelText("Default resume format"), "Ram DE");
+    expect(screen.getByLabelText("Default resume format")).toHaveDisplayValue("Ram");
+    expect(screen.getByLabelText("Base resume language")).toHaveDisplayValue("English");
   });
 
   it("offers the posting's language, the 21 built-in ones and the user's own", () => {
@@ -116,7 +146,7 @@ describe("Documents settings (E10-3)", () => {
     const select = screen.getByLabelText("Base resume language") as HTMLSelectElement;
     expect(select).toHaveDisplayValue("English");
     expect(select.options).toHaveLength(21);
-    expect(select).toHaveAccessibleDescription("For its headings and dates. Tailored documents use their application's language.");
+    expect(select).toHaveAccessibleDescription("For its headings and dates. Choosing Ram, Ram DE, Priya or Priya DE as the default format sets it. Tailored documents use their application's language.");
     await user.selectOptions(select, "German");
     expect(updateSettings).toHaveBeenLastCalledWith({ resumeLanguage: "German" });
     await user.selectOptions(select, "English");

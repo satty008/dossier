@@ -64,11 +64,32 @@ export const BUILT_IN_THEMES: ThemeData[] = (
     { id: "console", name: "Console", headFont: "JETBRAINS_MONO", bodyFont: "WORK_SANS", accent: "#4a5563", layout: "SPLIT", align: "LEFT", headingStyle: "BAND", density: "COMPACT", sidebarStyle: "TINTED", photoShape: "SQUARE", photoPosition: "SIDEBAR" },
     { id: "atlas", name: "Atlas", headFont: "LIBRE_CASLON", bodyFont: "INTER", accent: "#a14a1f", layout: "SINGLE", align: "CENTER", headingStyle: "CAPS", density: "REGULAR", headerStyle: "BANNER", dateStyle: "TIMELINE", photoPosition: "ABOVE_NAME" },
     // The two resume formats of the household, from the modern-cv template for Typst: each has its own header, photo, section titles and spacing, set by its layout.
-    // Choosing one as the base theme (Resume → Themes, or Settings → Documents) makes it the default.
+    // Choosing one as the base theme (Resume → Themes, or Settings → Documents) makes it the default. Each comes in English and German ("DE") with the same look:
+    // choosing one sets the base resume's language to match (see `formatLanguage`), and Priya DE leaves its Profile without a heading, as her German template does.
     { id: "default-ram", name: "Ram", headFont: "ROBOTO", bodyFont: "SOURCE_SANS", accent: "#262f99", layout: "TWO_COLUMN", align: "CENTER", headingStyle: "RULE", density: "COMPACT" },
+    { id: "default-ram-de", name: "Ram DE", headFont: "ROBOTO", bodyFont: "SOURCE_SANS", accent: "#262f99", layout: "TWO_COLUMN", align: "CENTER", headingStyle: "RULE", density: "COMPACT" },
     { id: "default-priya", name: "Priya", headFont: "ROBOTO", bodyFont: "SOURCE_SANS", accent: "#262f99", layout: "TWO_COLUMN_COMPACT", align: "CENTER", headingStyle: "RULE", density: "COMPACT" },
+    { id: "default-priya-de", name: "Priya DE", headFont: "ROBOTO", bodyFont: "SOURCE_SANS", accent: "#262f99", layout: "TWO_COLUMN_COMPACT", align: "CENTER", headingStyle: "RULE", density: "COMPACT" },
   ] satisfies (Omit<ThemeData, "builtIn" | StyleField> & Partial<Pick<ThemeData, StyleField>>)[]
 ).map((theme) => ({ ...THEME_STYLE_DEFAULTS, ...theme, builtIn: true }));
+
+/**
+ * The base resume language that choosing a format as the base theme sets: English (null, as the
+ * "Base resume language" setting keeps it) for Ram and Priya, German for Ram DE and Priya DE, so
+ * the base resume is English or German by the format picked. Every other theme leaves it as it is.
+ */
+const FORMAT_LANGUAGES = new Map<string, string | null>([
+  ["default-ram", null],
+  ["default-ram-de", "German"],
+  ["default-priya", null],
+  ["default-priya-de", "German"],
+]);
+
+/** The language choosing this theme sets for the base resume: null for English, undefined when it leaves it as it is. */
+export const formatLanguage = (themeId: string): string | null | undefined => FORMAT_LANGUAGES.get(themeId);
+
+/** The formats whose Profile has no heading, only the rule above its text: Priya's German template has a bare "=" there. */
+const UNTITLED_PROFILE = new Set(["default-priya-de"]);
 
 /** The page is this many units wide, whatever the paper. */
 export const PAGE_WIDTH = 640;
@@ -334,6 +355,8 @@ export function resolveTheme(theme: ThemeData, layout: ThemeLayout = theme.layou
     columns: hasColumns(layout),
     /** Of those, the one whose roles are as compact as education entries, and whose education entries are the roomy ones. */
     compactRoles: layout === ThemeLayout.TWO_COLUMN_COMPACT,
+    /** Of those, the format whose Profile has a rule and no heading above its text (Priya DE). */
+    untitledProfile: hasColumns(layout) && UNTITLED_PROFILE.has(theme.id),
     // Sidebar layouts always align the header left.
     centered: !split && theme.align === ThemeAlign.CENTER,
     banner: theme.headerStyle === HeaderStyle.BANNER,

@@ -41,6 +41,28 @@ describe("setBaseTheme", () => {
     expect(await setBaseTheme({ id: "gone" })).toMatchObject({ ok: false, error: expect.stringMatching(/doesn't exist/) });
     expect(await baseThemeId()).toBe("editorial");
   });
+
+  it("sets the base resume's language with a format of Ram's or Priya's: German for the German ones, English for the others, and leaves it for other themes", async () => {
+    const language = async () => (await loadSettings()).resumeLanguage;
+    expect(await language()).toBeNull();
+    await setBaseTheme({ id: "default-ram-de" });
+    expect(await language()).toBe("German");
+    expect(await baseThemeId()).toBe("default-ram-de");
+    await setBaseTheme({ id: "modern" });
+    expect(await language()).toBe("German");
+    await setBaseTheme({ id: "default-priya" });
+    expect(await language()).toBeNull();
+    await setBaseTheme({ id: "default-priya-de" });
+    expect(await language()).toBe("German");
+    await setBaseTheme({ id: "default-ram" });
+    expect(await language()).toBeNull();
+  });
+
+  it("changes nothing when the theme doesn't exist, the language included", async () => {
+    await setBaseTheme({ id: "default-ram-de" });
+    await setBaseTheme({ id: "default-gone-de" });
+    expect((await loadSettings()).resumeLanguage).toBe("German");
+  });
 });
 
 describe("saveTheme", () => {

@@ -10,15 +10,19 @@ import { loadSettings, saveSettings } from "@/lib/settings-data";
 import { THEME_FIELDS } from "@/lib/theme-data";
 import { sectionLayoutSchema } from "@/lib/resume-sections";
 import { parseThemeFile, themeFieldsSchema } from "@/lib/theme-file";
-import type { ThemeData } from "@/lib/themes";
+import { formatLanguage, type ThemeData } from "@/lib/themes";
 
 const THEME_GONE = "That theme doesn't exist anymore. Reload the page to see your themes.";
 
-/** Makes a theme the base resume theme (RES-2). */
+/**
+ * Makes a theme the base resume theme (RES-2). Ram and Priya come in English and German: choosing one
+ * sets the base resume's language too, so it's in the language of the format picked.
+ */
 export const setBaseTheme = action(z.object({ id: z.string().min(1) }), async ({ id }) => {
   const theme = await prisma.theme.findUnique({ where: { id }, select: { id: true } });
   if (!theme) throw new ActionError(THEME_GONE);
-  await saveSettings({ baseThemeId: id });
+  const language = formatLanguage(id);
+  await saveSettings({ baseThemeId: id, ...(language !== undefined && { resumeLanguage: language }) });
   revalidatePath("/resume");
   return null;
 });

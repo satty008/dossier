@@ -24,13 +24,13 @@ function renderPicker(activeId = "editorial") {
 }
 
 describe("ThemePicker", () => {
-  it("shows the fourteen built-in themes as buttons named after them, the active one in use (RES-2)", () => {
+  it("shows the sixteen built-in themes as buttons named after them, the active one in use (RES-2)", () => {
     renderPicker();
     expect(screen.getByRole("button", { name: "Editorial theme, in use" })).toBeInTheDocument();
-    for (const name of ["Classic", "Modern", "Minimal", "Technical", "Ledger", "Signal", "Studio", "Chronicle", "Folio", "Console", "Atlas", "Ram", "Priya"]) {
+    for (const name of ["Classic", "Modern", "Minimal", "Technical", "Ledger", "Signal", "Studio", "Chronicle", "Folio", "Console", "Atlas", "Ram", "Ram DE", "Priya", "Priya DE"]) {
       expect(screen.getByRole("button", { name: `${name} theme` })).toBeInTheDocument();
     }
-    expect(screen.getAllByText("Jane Doe")).toHaveLength(14);
+    expect(screen.getAllByText("Jane Doe")).toHaveLength(16);
   });
 
   it("sketches a banner theme's name on its accent, in the color that reads on it", () => {

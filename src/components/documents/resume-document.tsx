@@ -122,7 +122,8 @@ export function ResumeDocument({ theme, profile, paper, layout, sections = DEFAU
 
   const drawn: Record<string, ReactNode> = {
     summary: content.summary && (
-      <DocumentSection key="summary" title={sectionHeading(sections, "summary", labels.profile)}>
+      // Priya's German template has no title over its Profile, only the rule, unless this resume gives it one.
+      <DocumentSection key="summary" title={sectionHeading(sections, "summary", labels.profile)} untitled={resolved.untitledProfile && !sections.titles?.summary?.trim()}>
         {renderUnit({ id: "summary", children: <p className={styles.summary}>{content.summary}</p> })}
       </DocumentSection>
     ),

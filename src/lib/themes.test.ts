@@ -6,6 +6,7 @@ import {
   contrastRatio,
   DENSITIES,
   FIT_LEVELS,
+  formatLanguage,
   hasColumns,
   hasSidebar,
   layoutDensity,
@@ -68,6 +69,34 @@ describe("resolveTheme", () => {
     expect(hasColumns("TWO_COLUMN_COMPACT")).toBe(true);
     expect(hasColumns("SPLIT")).toBe(false);
     expect(layoutDensity("TWO_COLUMN_COMPACT", "AIRY")).toBe(TWO_COLUMN_DENSITY);
+  });
+
+  it("has a German format for each of them, with the same look and the same layout", () => {
+    expect(theme("default-ram-de")).toMatchObject({ name: "Ram DE", builtIn: true, layout: "TWO_COLUMN" });
+    expect(theme("default-priya-de")).toMatchObject({ name: "Priya DE", builtIn: true, layout: "TWO_COLUMN_COMPACT" });
+    for (const [german, english] of [["default-ram-de", "default-ram"], ["default-priya-de", "default-priya"]]) {
+      const { id, name, ...look } = theme(german);
+      const { id: englishId, name: englishName, ...englishLook } = theme(english);
+      expect([id, name]).not.toEqual([englishId, englishName]);
+      expect(look).toEqual(englishLook);
+    }
+  });
+
+  it("says which language choosing a format sets for the base resume: German for the German ones, English for the others of the pair, and nothing for any other theme", () => {
+    expect(formatLanguage("default-ram-de")).toBe("German");
+    expect(formatLanguage("default-priya-de")).toBe("German");
+    // English is null, as the "Base resume language" setting keeps it.
+    expect(formatLanguage("default-ram")).toBeNull();
+    expect(formatLanguage("default-priya")).toBeNull();
+    expect(formatLanguage("editorial")).toBeUndefined();
+    expect(formatLanguage("a custom theme's id")).toBeUndefined();
+    expect(formatLanguage("toString")).toBeUndefined();
+  });
+
+  it("leaves the Profile without a title in Priya DE only, and only in a two-column layout", () => {
+    expect(resolveTheme(theme("default-priya-de")).untitledProfile).toBe(true);
+    expect(resolveTheme(theme("default-priya-de"), "SINGLE").untitledProfile).toBe(false);
+    for (const id of ["default-priya", "default-ram", "default-ram-de", "editorial"]) expect(resolveTheme(theme(id)).untitledProfile, id).toBe(false);
   });
 
   it("puts white on dark accents and ink on light ones", () => {

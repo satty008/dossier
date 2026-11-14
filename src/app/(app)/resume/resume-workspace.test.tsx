@@ -130,6 +130,39 @@ describe("ResumeWorkspace", () => {
     expect(setBaseTheme).toHaveBeenCalledWith({ id: "classic" });
   });
 
+  describe("the German formats", () => {
+    const titles = () => within(screen.getByRole("article", { name: "Resume" })).getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent);
+
+    it("shows the base resume in German as soon as Ram DE or Priya DE is picked, and in English again for Ram or Priya; other themes leave it", async () => {
+      render(<ResumeWorkspace {...props} />);
+      expect(titles()).toContain("Experience");
+      await userEvent.click(screen.getByRole("button", { name: "Ram DE theme" }));
+      expect(previewLabel()).toBe("Ram DE");
+      expect(titles()).toContain("Berufserfahrung");
+      expect(setBaseTheme).toHaveBeenLastCalledWith({ id: "default-ram-de" });
+      await userEvent.click(screen.getByRole("button", { name: "Classic theme" }));
+      expect(titles()).toContain("Berufserfahrung");
+      await userEvent.click(screen.getByRole("button", { name: "Priya theme" }));
+      expect(titles()).toContain("Experience");
+      await userEvent.click(screen.getByRole("button", { name: "Priya DE theme" }));
+      expect(titles()).toContain("Berufserfahrung");
+    });
+
+    it("goes back to the saved language with the saved theme when saving fails", async () => {
+      vi.mocked(setBaseTheme).mockResolvedValue({ ok: false, error: "That theme doesn't exist anymore." });
+      render(<ResumeWorkspace {...props} />);
+      await userEvent.click(screen.getByRole("button", { name: "Ram DE theme" }));
+      expect(await screen.findByRole("button", { name: "Modern theme, in use" })).toBeInTheDocument();
+      expect(titles()).toContain("Experience");
+      expect(titles()).not.toContain("Berufserfahrung");
+    });
+
+    it("starts in the language it's given, whatever the theme", () => {
+      render(<ResumeWorkspace {...props} language="German" baseThemeId="default-ram-de" />);
+      expect(titles()).toContain("Berufserfahrung");
+    });
+  });
+
   it("goes back to the saved theme when saving fails", async () => {
     vi.mocked(setBaseTheme).mockResolvedValue({ ok: false, error: "That theme doesn't exist anymore." });
     render(<ResumeWorkspace {...props} />);
