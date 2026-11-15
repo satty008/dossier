@@ -30,8 +30,9 @@ const variants: Record<ButtonVariant, string> = {
 
 const sizes: Record<ButtonSize, string> = {
   lg: "min-h-10 px-4 py-2 text-field",
-  md: "min-h-[34px] px-3 py-1.5 text-sm",
-  sm: "min-h-[30px] px-3 py-1 text-control",
+  // A finger needs more than a pointer does: taller where the screen is touched.
+  md: "min-h-[34px] px-3 py-1.5 text-sm pointer-coarse:min-h-10",
+  sm: "min-h-[30px] px-3 py-1 text-control pointer-coarse:min-h-9",
 };
 
 /** Button styles, for links that look like buttons: `<Link className={buttonClassName()}>`. */

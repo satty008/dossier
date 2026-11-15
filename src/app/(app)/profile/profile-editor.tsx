@@ -6,6 +6,7 @@ import { useState, type ReactNode } from "react";
 
 import { PageHeader } from "@/components/page-header";
 import { SavedIndicator } from "@/components/saved-indicator";
+import { SectionPicker } from "@/components/section-picker";
 import { buttonClassName } from "@/components/ui/button";
 import { toastResult } from "@/components/toast";
 import { factTexts, paidRoles, REQUIRED_BASICS, type CustomSection, type EntryOrder, type ProfileData } from "@/lib/profile";
@@ -122,17 +123,19 @@ export function ProfileEditor({ initial, section, order, sections }: { initial: 
         }
       />
 
-      <div className="flex flex-wrap items-start gap-x-12 gap-y-10 px-10 pt-2 pb-20">
-        <div className="flex max-w-[260px] min-w-[220px] flex-[1_1_240px] flex-col gap-6">
+      <div className="flex flex-wrap items-start gap-x-12 gap-y-10 px-(--page-gutter) pt-2 pb-20">
+        <div className="flex max-w-[260px] min-w-[220px] flex-[1_1_240px] flex-col gap-6 max-md:max-w-none">
           <StrengthMeter profile={profile} />
-          <SectionNav
-            rows={nav.map((entry) => ({ ...entry, count: customOf(entry.id)?.items.length.toString() ?? counts[entry.id as SectionId] }))}
-            current={section}
-            onMove={(rows) => void moveRows(rows)}
-          />
-          <p className="text-label text-pretty text-muted">
-            Drag to reorder. Resumes use this order unless one has its own, and two-column themes keep some sections in the sidebar.
-          </p>
+          <SectionPicker label="Section" current={section === "new" ? "Add a section" : (current?.label ?? "Sections")}>
+            <SectionNav
+              rows={nav.map((entry) => ({ ...entry, count: customOf(entry.id)?.items.length.toString() ?? counts[entry.id as SectionId] }))}
+              current={section}
+              onMove={(rows) => void moveRows(rows)}
+            />
+            <p className="text-label text-pretty text-muted">
+              Drag to reorder. Resumes use this order unless one has its own, and two-column themes keep some sections in the sidebar.
+            </p>
+          </SectionPicker>
         </div>
 
         <div className="flex max-w-[760px] min-w-0 flex-[999_1_420px] flex-col gap-6">

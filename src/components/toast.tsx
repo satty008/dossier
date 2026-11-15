@@ -76,7 +76,7 @@ export function Toaster() {
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 bottom-7 z-40 flex justify-center px-4"
+      className="pointer-events-none fixed inset-x-0 bottom-[calc(var(--bottom-nav)+1rem)] z-40 flex justify-center px-4 md:bottom-7"
     >
       {shown && (
         <div

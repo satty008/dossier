@@ -46,12 +46,12 @@ export function AnnouncementNotice({ announcement }: { announcement: Announcemen
   return (
     <div
       role={severity === "security" ? "alert" : "status"}
-      className="pointer-events-none fixed inset-x-4 bottom-4 z-40 flex justify-end print:hidden"
+      className="pointer-events-none fixed inset-x-4 bottom-[calc(var(--bottom-nav)+1rem)] z-40 flex justify-end md:bottom-4 print:hidden"
     >
       {loaded && !hidden && (
         <section
           aria-labelledby={titleId}
-          className="pointer-events-auto flex max-h-[calc(100dvh-2rem)] w-full flex-col gap-3 overflow-y-auto rounded-dialog bg-inverse p-5 text-on-inverse shadow-dialog ring-1 ring-line-strong sm:w-96 motion-safe:animate-notice-in"
+          className="pointer-events-auto flex max-h-[calc(100dvh-var(--bottom-nav)-2rem)] w-full flex-col gap-3 overflow-y-auto rounded-dialog bg-inverse p-5 text-on-inverse shadow-dialog ring-1 ring-line-strong sm:w-96 motion-safe:animate-notice-in"
         >
           <p className={cn("flex items-center gap-2.5 text-meta font-medium", tone)}>
             <span className="relative grid size-5 shrink-0 place-items-center">

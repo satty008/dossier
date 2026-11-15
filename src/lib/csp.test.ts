@@ -9,6 +9,9 @@ describe("contentSecurityPolicy (E11-5)", () => {
     expect(policy).toContain("default-src 'self'");
     expect(policy).toContain("frame-ancestors 'none'");
     expect(policy).toContain("object-src 'none'");
+    // Named outright, since 'strict-dynamic' leaves a worker's source to script-src and 'self' doesn't count there.
+    expect(policy).toContain("worker-src 'self'");
+    expect(policy).toContain("manifest-src 'self'");
     expect(policy).not.toContain("unsafe-eval");
     expect(policy).not.toContain("upgrade-insecure-requests");
   });

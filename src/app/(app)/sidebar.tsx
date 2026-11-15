@@ -6,6 +6,7 @@ import { signOut } from "@/lib/auth/actions";
 import type { Release } from "@/lib/releases";
 import type { ColorScheme } from "@/lib/ui-preferences";
 
+import { MobileNav } from "./mobile-nav";
 import { NavLinks } from "./nav-links";
 import { RepositoryLink } from "./repository-link";
 import { SidebarFrame } from "./sidebar-frame";
@@ -21,7 +22,9 @@ function initials(name: string): string {
 /**
  * The signed-in sidebar: brand header, "+ New application", navigation, a
  * notice while a newer release is out, the theme switch and a link to the
- * repository, and the account footer.
+ * repository, and the account footer. On a phone it's the menu instead, next
+ * to the bar of sections at the bottom of the screen (MobileNav): the same
+ * contents, so the two agree.
  */
 export function Sidebar({
   userName,
@@ -44,25 +47,23 @@ export function Sidebar({
   /** Badges by nav item, e.g. replies waiting in the inbox. */
   counts?: Record<string, number>;
 }) {
-  return (
-    <SidebarFrame
-      initialCollapsed={collapsed}
-      brand={
-        <>
-          <BrandMark />
-          <div className="flex min-w-0 flex-col group-data-collapsed/sidebar:hidden">
-            <span className="font-serif text-2xl leading-none font-medium tracking-[-0.01em]">Dossier</span>
-            <span className="truncate text-xs text-muted">Your job search, on your server</span>
-          </div>
-        </>
-      }
-    >
+  const brand = (
+    <>
+      <BrandMark />
+      <div className="flex min-w-0 flex-col group-data-collapsed/sidebar:hidden">
+        <span className="font-serif text-2xl leading-none font-medium tracking-[-0.01em]">Dossier</span>
+        <span className="truncate text-xs text-muted">Your job search, on your server</span>
+      </div>
+    </>
+  );
+  const body = (
+    <>
       <div className="flex flex-1 flex-col gap-1 p-2 group-data-collapsed/sidebar:px-1">
         {/* Always a fresh start, whatever an open draft holds (E7-7). */}
         <Link
           href="/new?fresh=1"
           title="New application"
-          className="mb-2 flex min-h-[34px] items-center gap-1.5 rounded-control bg-primary px-3 text-sm font-semibold text-on-primary shadow-cta hover:bg-primary-hover hover:text-on-primary motion-safe:transition-colors group-data-collapsed/sidebar:justify-center group-data-collapsed/sidebar:px-1.5"
+          className="mb-2 flex min-h-[34px] items-center gap-1.5 rounded-control bg-primary px-3 text-sm font-semibold text-on-primary shadow-cta hover:bg-primary-hover hover:text-on-primary max-md:min-h-11 motion-safe:transition-colors group-data-collapsed/sidebar:justify-center group-data-collapsed/sidebar:px-1.5"
         >
           <Plus size={16} aria-hidden="true" className="shrink-0" />
           {/* Hidden while collapsed, but still the link's name. */}
@@ -108,6 +109,17 @@ export function Sidebar({
           </form>
         )}
       </div>
-    </SidebarFrame>
+    </>
+  );
+
+  return (
+    <>
+      <SidebarFrame initialCollapsed={collapsed} brand={brand}>
+        {body}
+      </SidebarFrame>
+      <MobileNav brand={brand} counts={counts}>
+        {body}
+      </MobileNav>
+    </>
   );
 }

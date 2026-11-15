@@ -4,6 +4,7 @@ import { Moon, Sun } from "lucide-react";
 import { useSyncExternalStore } from "react";
 
 import { cn } from "@/lib/cn";
+import { showThemeColor } from "@/lib/pwa";
 import { COLOR_SCHEME_COOKIE, rememberPreference, type ColorScheme } from "@/lib/ui-preferences";
 
 import { useSidebarCollapsed } from "./sidebar-frame";
@@ -45,6 +46,7 @@ export function ThemeToggle({ serverScheme }: { serverScheme?: ColorScheme }) {
   const toggle = () => {
     document.documentElement.dataset.theme = next;
     rememberPreference(COLOR_SCHEME_COOKIE, next);
+    showThemeColor(next);
     listeners.forEach((listener) => listener());
   };
 
@@ -54,7 +56,7 @@ export function ThemeToggle({ serverScheme }: { serverScheme?: ColorScheme }) {
       onClick={toggle}
       title={collapsed ? label : undefined}
       className={cn(
-        "flex w-full items-center gap-1.5 rounded-control px-3 py-1.5 text-left text-sm font-medium text-muted hover:bg-hover hover:text-ink motion-safe:transition-colors",
+        "flex w-full items-center gap-1.5 rounded-control px-3 py-1.5 text-left text-sm font-medium text-muted hover:bg-hover hover:text-ink max-md:py-2.5 motion-safe:transition-colors",
         collapsed && "justify-center px-1.5",
       )}
     >

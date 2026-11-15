@@ -92,7 +92,7 @@ export function StartupsScreen({ filter, list, lastRefresh, refreshJobId, city, 
           </Button>
         }
       />
-      <div className="flex flex-col gap-6 px-10 pb-20">
+      <div className="flex flex-col gap-6 px-(--page-gutter) pb-20">
         <RefreshStatus lastRefresh={lastRefresh} refreshing={refreshing} step={job?.step ?? null} today={today} />
         {lastRefresh && (
           <>

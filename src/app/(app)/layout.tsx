@@ -64,14 +64,15 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         counts={{ ...(waiting > 0 ? { "/inbox": waiting } : {}), ...(agent > 0 ? { "/agent": agent } : {}) }}
         colorScheme={parseColorScheme(jar.get(COLOR_SCHEME_COOKIE)?.value)}
       />
-      {/* The screen sits in a white panel inset from the shell. Each screen
-          starts with its page bar (PageHeader or PageBar), which draws the
-          panel's top edge and stays in view. */}
-      <div className="flex min-w-0 flex-1 flex-col bg-paper px-2 pb-2">
+      {/* From 768px up the screen sits in a white panel inset from the shell;
+          on a phone it fills the window, above the bar of sections. Each
+          screen starts with its page bar (PageHeader or PageBar), which draws
+          the panel's top edge and stays in view. */}
+      <div className="flex min-w-0 flex-1 flex-col bg-paper pb-(--bottom-nav) md:px-2 md:pb-2">
         <main
           id="main"
           tabIndex={-1}
-          className="relative flex min-w-0 flex-1 flex-col rounded-b-panel border border-t-0 border-line-card bg-surface focus:outline-none"
+          className="relative flex min-w-0 flex-1 flex-col bg-surface focus:outline-none md:rounded-b-panel md:border md:border-t-0 md:border-line-card"
         >
           {children}
         </main>

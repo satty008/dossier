@@ -44,7 +44,7 @@ export function EmailTab({
   /** The History button. */
   history: ReactNode;
   /** How to change it, while the current version is shown. */
-  hint?: string;
+  hint?: ReactNode;
   /** Above the email, e.g. the banner over an earlier version. */
   notice?: ReactNode;
   /** It's being written or rewritten. */
@@ -57,7 +57,7 @@ export function EmailTab({
 }) {
   if (!units) {
     return (
-      <div className="flex flex-1 flex-col items-center overflow-auto bg-canvas px-10 pt-11 pb-16">
+      <div className="flex flex-1 flex-col items-center overflow-auto bg-canvas px-(--page-gutter) pt-11 pb-16">
         <div className="flex w-full max-w-[560px] flex-col items-start gap-3 rounded-panel border border-line-card bg-card px-7 py-7">
           <h2 className="font-serif text-section">An email to send it with</h2>
           <p className="text-sm text-muted">
@@ -77,7 +77,7 @@ export function EmailTab({
     toast((await copyText(text)) ? `Copied the ${what}.` : "That didn't copy. Select the text and copy it yourself.");
 
   return (
-    <div className="flex flex-1 flex-col items-center gap-4 overflow-auto bg-canvas px-10 pt-11 pb-16">
+    <div className="flex flex-1 flex-col items-center gap-4 overflow-auto bg-canvas px-(--page-gutter) pt-11 pb-16">
       <div className="flex w-full max-w-[680px] flex-wrap items-center justify-between gap-x-3 gap-y-1 text-meta text-muted">
         <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
           <span>Email · {aboutWords([body])}</span>

@@ -2,6 +2,7 @@
 
 import { useRef, useState, type PointerEvent } from "react";
 
+import { ScrollRegion } from "@/components/scroll-region";
 import type { ApplicationStatus, FunnelStage } from "@/generated/prisma/enums";
 import { FUNNEL_OUTCOMES, type FunnelOutcome, type FunnelStep } from "@/lib/dashboard";
 import { statusInfo } from "@/lib/status";
@@ -166,9 +167,9 @@ export function FunnelChart({ funnel }: { funnel: readonly FunnelStep[] }) {
 
   if (sent === 0) {
     return (
-      <div className="relative overflow-x-auto">
+      <ScrollRegion label="Funnel stages">
         <div className="min-w-[760px]">{labels}</div>
-      </div>
+      </ScrollRegion>
     );
   }
 
@@ -218,7 +219,7 @@ export function FunnelChart({ funnel }: { funnel: readonly FunnelStep[] }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="relative overflow-x-auto">
+      <ScrollRegion label="Funnel stages">
         <div className="min-w-[760px] pb-1">
           {labels}
           {/* The picture; the labels above and the table below have the same numbers for screen readers and keyboards. */}
@@ -303,11 +304,11 @@ export function FunnelChart({ funnel }: { funnel: readonly FunnelStep[] }) {
             )}
           </div>
         </div>
-      </div>
+      </ScrollRegion>
 
       <details className="text-meta text-muted">
         <summary className="w-fit cursor-pointer hover:text-ink">Show the numbers</summary>
-        <div className="relative overflow-x-auto">
+        <ScrollRegion label="Funnel numbers">
           <table className="mt-3 w-full max-w-[640px] text-left tabular-nums">
             <caption className="sr-only">How far your sent applications got, and where the ones that stopped at each stage are now</caption>
             <thead>
@@ -339,7 +340,7 @@ export function FunnelChart({ funnel }: { funnel: readonly FunnelStep[] }) {
               ))}
             </tbody>
           </table>
-        </div>
+        </ScrollRegion>
       </details>
     </div>
   );

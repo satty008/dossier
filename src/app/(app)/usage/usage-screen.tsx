@@ -1,4 +1,5 @@
 import { PageHeader } from "@/components/page-header";
+import { ScrollRegion } from "@/components/scroll-region";
 import { cn } from "@/lib/cn";
 import { DASHBOARD_PERIODS, type DashboardPeriod } from "@/lib/dashboard";
 import { formatDay } from "@/lib/dates";
@@ -31,8 +32,8 @@ export function UsageScreen({
         description="The tokens each kind of AI request used, as your AI provider and Jev counted them. Input is what Dossier sent, output what came back, thinking included."
       />
       <PeriodFilter period={period} path="/usage" remember={false}>
-        <PeriodScoped className="flex max-w-[960px] flex-col gap-3 px-10 pb-[72px]">
-          <div className="relative overflow-x-auto rounded-panel border border-line-card bg-card">
+        <PeriodScoped className="flex max-w-[960px] flex-col gap-3 px-(--page-gutter) pb-[72px]">
+          <ScrollRegion label="Tokens by task" className="rounded-panel border border-line-card bg-card">
             <table className="w-full min-w-[640px] border-collapse text-left">
               <caption className="sr-only">Tokens by task, {within}</caption>
               <thead>
@@ -67,7 +68,7 @@ export function UsageScreen({
                 </tr>
               </tfoot>
             </table>
-          </div>
+          </ScrollRegion>
           <p className="text-meta text-muted">
             {countingSince ? `Counting since ${formatDay(countingSince, timeZone)}.` : "Nothing counted yet. Every AI request counts from now on."}
             {unreported && " “Not reported” means the server didn't say how many tokens a request used."}

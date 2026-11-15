@@ -12,6 +12,9 @@ const SIGNED_OUT_ACTIONS = new Map([
 ]);
 const OPEN_ROUTES = new Set([
   "src/app/api/health/route.ts", // for health checks; says nothing private
+  // The service worker: a browser fetches it to install the app, without cookies, and
+  // it holds nothing private (src/lib/service-worker.ts). The proxy lets it through.
+  "src/app/sw.js/route.ts",
   // Google's redirect comes from Google's site, so route()'s same-origin check
   // would refuse it; it checks the session and its signed state itself (E15-1).
   "src/app/api/google/callback/route.ts",

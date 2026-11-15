@@ -6,13 +6,17 @@ import { resetData } from "./support";
 // reload, followed by the resume, and back to date order.
 test.beforeAll(resetData);
 
+/** The roles' cards: the buttons that open and fold them. The sections picker and the phone's Menu have one too, but aren't shown on a computer. */
+const CARDS = "main button[aria-expanded]:visible";
+
 /** The role titles in the order the cards show them. */
 const roles = (page: Page) =>
-  page.locator("button[aria-expanded]").evaluateAll((buttons) => buttons.map((button) => button.querySelector("span span")?.textContent));
+  page.locator(CARDS).evaluateAll((buttons) => buttons.map((button) => button.querySelector("span span")?.textContent));
 
 test("moves roles by keyboard and by dragging, and the resume follows", async ({ page }) => {
   await page.goto("/profile?section=experience");
-  expect(await roles(page)).toEqual(["Senior Product Designer", "Product Designer", "UX Designer"]);
+  // Counted once they're shown, which takes a moment after the page's load.
+  await expect.poll(() => roles(page)).toEqual(["Senior Product Designer", "Product Designer", "UX Designer"]);
   await expect(page.getByText(/^Newest first/)).toBeVisible();
 
   // Keyboard: the arrows.
@@ -27,7 +31,7 @@ test("moves roles by keyboard and by dragging, and the resume follows", async ({
   const card = page.locator("div.rounded-panel", { has: page.getByRole("button", { name: /^Product Designer/, expanded: false }) });
   const handle = card.getByTitle("Drag to reorder");
   const from = (await handle.boundingBox())!;
-  const top = (await page.locator("button[aria-expanded]").first().boundingBox())!;
+  const top = (await page.locator(CARDS).first().boundingBox())!;
   await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
   await page.mouse.down();
   await page.mouse.move(from.x + from.width / 2, from.y - 20, { steps: 5 });

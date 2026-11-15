@@ -75,8 +75,9 @@ function pass(request: NextRequest): NextResponse {
 export const config = {
   matcher: [
     // Everything except the health check, Next.js' own assets (scripts,
-    // styles, fonts, images), the dev server's hot-reload socket and public
-    // files.
-    "/((?!api/health(?:/|$)|_next/static/|_next/image|_next/hmr|favicon\\.ico$|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt)$).*)",
+    // styles, fonts, images), the dev server's hot-reload socket, public
+    // files, and the two a browser fetches to install the app, without
+    // cookies: the manifest and the service worker. None holds anything private.
+    "/((?!api/health(?:/|$)|_next/static/|_next/image|_next/hmr|favicon\\.ico$|manifest\\.webmanifest$|sw\\.js$|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt)$).*)",
   ],
 };

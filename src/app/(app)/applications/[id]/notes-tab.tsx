@@ -53,7 +53,7 @@ export function NotesTab({ applicationId, activity }: { applicationId: string; a
     });
 
   return (
-    <div className="@container flex flex-1 flex-col items-center gap-4 overflow-auto bg-canvas px-10 pt-11 pb-16">
+    <div className="@container flex flex-1 flex-col items-center gap-4 overflow-auto bg-canvas px-(--page-gutter) pt-11 pb-16">
       <div className="flex w-full max-w-[640px] flex-wrap justify-between gap-x-3 gap-y-1 text-meta text-muted">
         <span>Notes and activity</span>
         <span>Private and never sent to the AI</span>

@@ -77,6 +77,20 @@
   pointer-events: auto;
 }
 
+/* A touch screen has no hovering: a tap puts focus in the unit, and its
+   toolbar shows while it's there. (A mouse's click leaves focus behind too,
+   which is why this is only for a coarse pointer.) */
+@media (pointer: coarse) {
+  .frame:focus-within::before {
+    background: var(--color-hover);
+  }
+
+  .frame:focus-within > .toolbar {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
 /* In the margin before the unit, so it doesn't move the text. */
 .check {
   position: absolute;

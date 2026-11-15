@@ -45,6 +45,7 @@ It's for one person on a small server: one password, your data in your own Postg
 - **MCP connector (optional):** use Dossier from Claude, on claude.ai, in the Desktop and mobile apps or in Claude's command-line app, on your own Claude plan, or from another MCP app such as n8n. Claude can search for jobs, score them against your profile, read your profile and applications, and save the resume and cover letter it writes as a Draft, checked like Dossier's own. It never sends or deletes anything. Without an AI model of Dossier's own, **Write it with Claude** hands a posting to a new Claude chat. Turn it on in Settings → MCP connector (see [Connecting Claude](https://github.com/AienTech/dossier/wiki/Connecting-Claude)).
 - **Gmail and Calendar (optional):** connect your Google account to send an application from your own address with its PDFs attached, see employers' replies next to each application, have the AI read what they ask and draft your answer from your profile, offer interview times you're free, and see your month and the week ahead on the dashboard, with interviews kept in step with Google Calendar both ways. Nothing is sent without your confirmation. Set it up by entering your Google OAuth client in Settings → Google, or with `DOSSIER_GOOGLE_CLIENT_ID` and `DOSSIER_GOOGLE_CLIENT_SECRET` (see [Connecting Gmail and Calendar](https://github.com/AienTech/dossier/wiki/Connecting-Gmail-and-Calendar)).
 - **Track:** a board and a table of every application, and a dashboard with your funnel (last 30 days, 90 days or all time), a week-by-week chart, what's worth a look next, upcoming interviews included, and a calendar.
+- **On your phone:** every screen fits a phone's width, with a bar of the main sections at the bottom and the rest in a menu, and Dossier installs as an app from the browser: its own icon and window, and a short page of its own when your server can't be reached. Settings → About says how on your device (*Install app* in Chrome and Edge, *Add to Home Screen* in Safari). Browsers only install pages served over HTTPS, so it takes a server behind HTTPS (or `localhost`). Nothing is kept on the phone: pages and documents always come from your server.
 - **Your data:** export and import everything as one file, nightly backups, and Delete everything.
 
 ## Screenshots
@@ -131,7 +132,7 @@ The [wiki](https://github.com/AienTech/dossier/wiki) has what comes after instal
 
 ## Known limitations
 
-- **Desktop only:** made for a laptop or desktop browser, not for phones.
+- **Phones:** every screen fits and can be used, and the app installs like any other, but it only works with your server in reach: the installed app keeps no copy of your data, so there's nothing to read offline. Editing a resume or letter is easier on a bigger screen, since the preview is a shrunken page you tap or pinch.
 - **Single user:** one password and one profile; there are no accounts.
 - **English interface:** the app itself is in English. Documents can be written in other languages; in the 21 built-in ones, their headings, dates and language levels are in that language too, and in one added with **Other language…** those stay in English.
 - **One instance:** run a single copy of the app per database. The nightly backups, the AI job queue and the PDF browser live inside the app's process.

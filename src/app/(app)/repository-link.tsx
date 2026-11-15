@@ -19,7 +19,7 @@ export function RepositoryLink() {
       rel="noopener noreferrer"
       title={collapsed ? LABEL : undefined}
       className={cn(
-        "flex w-full items-center gap-1.5 rounded-control px-3 py-1.5 text-sm font-medium text-muted hover:bg-hover hover:text-ink motion-safe:transition-colors",
+        "flex w-full items-center gap-1.5 rounded-control px-3 py-1.5 text-sm font-medium text-muted hover:bg-hover hover:text-ink max-md:py-2.5 motion-safe:transition-colors",
         collapsed && "justify-center px-1.5",
       )}
     >

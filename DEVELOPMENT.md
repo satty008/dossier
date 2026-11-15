@@ -263,6 +263,29 @@ The answer and the dismissed IDs are the settings `announcementFeed` and `announ
 The backend is the project's own service and isn't published with the app. `src/lib/announcements/api-v1.schema.json` is a copy of its contract, and a test compares it with what the app reads, so update the copy when the contract grows. The API only grows, so the app ignores what it doesn't know.
 
 A production server asks `https://api.dossier.aien.me/v1`. A development server only asks while `DOSSIER_API_URL` is set, and then on every page, so a change shows without the wait: the first reload asks, and the next one shows it. To try it against a local copy of the backend, set that variable, for example in an untracked `compose.override.yml`. The variable isn't in `.env.example` or `compose.production.yml`, because nobody running the image needs it. `e2e/announcements.spec.ts` points it at the fake job sources.
+
+## Phones and the installable app
+
+**The layout** is desktop-first with one switch at 768px (Tailwind's `md`). From there up it is the sidebar and the inset panel. Below it, the sidebar is hidden and `MobileNav` (`src/app/(app)/mobile-nav.tsx`) takes over: a bar of the main sections (`MOBILE_TABS` in `src/lib/nav.ts`) fixed to the bottom of the window, and a **Menu** that opens the sidebar's own contents in a drawer. `Sidebar` builds that content once and gives it to both, so they can't drift apart. The panel fills the window and the page bar scrolls away with the page, since it can be three rows tall on a phone.
+
+Two CSS variables in `globals.css` carry the rest, and each is the desktop's value from 768px up:
+
+- `--page-gutter` is the side padding of every screen: 16px on a phone, 40px from 640px. Use `px-(--page-gutter)` instead of a fixed `px-10`.
+- `--bottom-nav` is the bar's height, with the home indicator's room, and `0px` at 768px and up. Anything fixed to the bottom of the window (toasts, the announcement card) or sized to it (`h-panel`) adds it.
+
+A long list of sections folds into one row on a phone (`SectionPicker`, used by Profile and Settings). Hover has no equivalent on a touch screen, so what shows on hover is also shown by a tap's focus under `@media (pointer: coarse)` (the toolbar over a part of a document, in `unit-frame.module.css`), and the hints say "Tap" there. On a coarse pointer buttons are taller, and every field's text is 16px (an unlayered rule at the end of `globals.css`), because iOS Safari zooms the page into a field with smaller text and leaves it zoomed. The bar of sections gives way while a field has focus, since the keyboard takes half the window.
+
+`e2e/mobile.spec.ts` runs every screen at 390px and 320px: nothing may scroll sideways, axe finds nothing, and the bar, the menu and the touch behaviour work. When you add a screen, add its path to `SCREENS` there. To look at the app at a phone's width, `docker/bin/yarn dev` and Chrome's device toolbar will do; a test run with a phone's `viewport`, `hasTouch` and `isMobile` is what the spec uses.
+
+**The app is installable** (a PWA). Browsers want a manifest, icons and a service worker, and a page served over HTTPS or from `localhost`:
+
+- `src/app/manifest.ts` is `/manifest.webmanifest`. The icons are in `public/icons`, drawn from `src/app/icon.svg` by `docker/bin/yarn pwa-icons` (run it only when the mark changes). The maskable one is full bleed with the mark inside the circle a launcher may crop to.
+- `src/app/sw.js/route.ts` serves the service worker, whose script is built in `src/lib/service-worker.ts`. **It keeps nothing**: no cache, no stored pages or data. Everything Dossier shows comes from the user's own server, so a device holds no copy of a profile, and signing out leaves nothing behind. All it does is answer a page it can't fetch (the network failed, or the reverse proxy says 502, 503 or 504) with a short page of its own, and the app switching pages without a reload falls back to opening the page, which lands there too. A test fails if the script ever touches a cache. If you add offline reading, decide first what may be stored on a device that isn't signed in any more.
+- `src/components/service-worker.tsx` registers it, in a production build only (a development server's pages change on every save), never in the desktop app, which is a window already, and not on the print pages. Playwright blocks service workers for every spec but `e2e/pwa.spec.ts`, since they'd otherwise sit between each spec and the server.
+- The proxy lets `/manifest.webmanifest` and `/sw.js` through without a session: browsers fetch the manifest without cookies, and neither holds anything private. The Content-Security-Policy names `worker-src 'self'` and `manifest-src 'self'` outright, since with `'strict-dynamic'` the worker would otherwise be left without a source.
+- Settings → About has the install button (`src/app/(app)/settings/install-app.tsx`). Chrome, Edge and Samsung's browser fire `beforeinstallprompt` once, early, and the offer is kept in `src/lib/install-prompt.ts` from the root layout on. Safari has no such event, so it says where to tap.
+- The colour of the browser's bar follows the scheme chosen in the sidebar (`generateViewport` in the root layout reads the cookie; the switch updates the tags at once), and the system's scheme otherwise.
+
 ## The desktop app
 
 `desktop/` is the app for Linux and Windows, built with Electron. One download, two modes, chosen on first launch: **On my server** opens the user's own Dossier in a window, and **On this computer** runs Dossier itself. There's no auto-update: people download each new version from the release page.

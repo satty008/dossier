@@ -45,6 +45,16 @@ describe("proxy matcher", () => {
       expect(matches(url), url).toBe(false);
     }
   });
+
+  it("skips what a browser fetches to install the app, without cookies: the manifest, its icons and the service worker", () => {
+    for (const url of ["/manifest.webmanifest", "/sw.js", "/icons/icon-192.png", "/icons/maskable-512.png"]) {
+      expect(matches(url), url).toBe(false);
+    }
+    // Only those two files, not other scripts or lookalikes.
+    for (const url of ["/sw.json", "/other/sw.js", "/manifest.webmanifest/x", "/app.js"]) {
+      expect(matches(url), url).toBe(true);
+    }
+  });
 });
 
 describe("proxy", () => {

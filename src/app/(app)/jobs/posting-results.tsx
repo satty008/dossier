@@ -171,7 +171,7 @@ export function PostingResults(props: PostingResultsProps) {
             : `No postings for “${searched.keywords}”${searched.place ? ` in ${searched.place}` : ""}. Try fewer words.`;
 
   return (
-    <div className="flex flex-wrap items-start gap-6 px-10 pb-16">
+    <div className="flex flex-wrap items-start gap-6 px-(--page-gutter) pb-16">
       {Object.entries(scoring).map(([key, { jobId }]) =>
         jobId ? <ScoreWatcher key={jobId} jobId={jobId} onChange={(job) => scoringChanged(key, job)} /> : null,
       )}
@@ -449,7 +449,7 @@ function PostingDetail({
     <section
       ref={ref}
       aria-labelledby={headingId}
-      className="flex min-w-0 flex-[999_1_420px] scroll-mt-[121px] flex-col gap-4 rounded-panel border border-line-card bg-card p-7 max-lg:order-first max-lg:max-h-[75vh] lg:sticky lg:top-[121px] lg:max-h-[calc(100dvh-145px)]"
+      className="flex min-w-0 flex-[999_1_420px] scroll-mt-[121px] flex-col gap-4 rounded-panel border border-line-card bg-card p-7 max-lg:order-first max-lg:max-h-[75dvh] lg:sticky lg:top-[121px] lg:max-h-[calc(100dvh-145px)]"
     >
       <div className="flex flex-col gap-1.5">
         <h2 id={headingId} className="font-serif text-section text-pretty">

@@ -72,7 +72,7 @@ export function InboxScreen({
           )
         }
       />
-      <div className="flex max-w-[860px] flex-col gap-5 px-10 pb-[72px]">
+      <div className="flex max-w-[860px] flex-col gap-5 px-(--page-gutter) pb-[72px]">
         {empty ? (
           <p className={`${card} py-6! text-sm text-muted`}>{connected ? "Nothing yet. Replies to your applications will show up here." : "Nothing here yet."}</p>
         ) : (

@@ -19,6 +19,8 @@ export default defineConfig({
     baseURL: `http://localhost:${APP_PORT}`,
     trace: "retain-on-failure",
     viewport: { width: 1400, height: 900 },
+    // The service worker is the subject of e2e/pwa.spec.ts alone: it would otherwise sit between every other spec and the server.
+    serviceWorkers: "block",
   },
   projects: [
     { name: "setup", testMatch: /setup\.ts$/ },

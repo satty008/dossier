@@ -54,3 +54,12 @@ export const isCurrent = ({ href, isActive = (path) => within(path, href) }: Nav
 export function currentSection(pathname: string): NavItem | undefined {
   return NAV.flatMap((group) => group.items).find((item) => isCurrent(item, pathname));
 }
+
+/** The sections on a phone's bar at the bottom of the screen, in order; the menu next to them has the rest. */
+export const MOBILE_TABS = ["/", "/jobs", "/applications", "/inbox"] as const;
+
+/** The items of the phone's bar, from the sections above, so a label or an icon is changed in one place. */
+export function mobileTabs(): NavItem[] {
+  const items = NAV.flatMap((group) => group.items);
+  return MOBILE_TABS.map((href) => items.find((item) => item.href === href)).filter((item): item is NavItem => item !== undefined);
+}

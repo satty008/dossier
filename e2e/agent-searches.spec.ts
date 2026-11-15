@@ -25,12 +25,10 @@ async function accessible(page: Page) {
 }
 
 async function mobile(page: Page) {
-  // The app's sidebar is manually collapsible, not an automatic mobile drawer.
-  // Exercise its real control so the 390px view leaves room for the content.
-  const collapse = page.getByRole("button", { name: "Collapse sidebar", exact: true });
-  if (await collapse.isVisible()) await collapse.click();
+  // Below 768px the sidebar gives way to the phone's bar of sections and its menu.
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect(page.getByRole("button", { name: "Expand sidebar", exact: true })).toBeVisible();
+  // Its name says when the agent has finds waiting, as here: "Menu (2 waiting)".
+  await expect(page.getByRole("button", { name: /^Menu\b/ })).toBeVisible();
 }
 
 async function capture(page: Page, name: string) {

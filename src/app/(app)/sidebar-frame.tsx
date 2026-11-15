@@ -19,7 +19,8 @@ export function useExpandSidebar(): () => void {
 }
 
 /**
- * The sidebar's frame, collapsible to a strip of icons.
+ * The sidebar's frame, collapsible to a strip of icons, from 768px up; a
+ * phone has the bar and menu of MobileNav instead.
  * The choice is kept in a cookie, so the server renders the next page the
  * same way. Inside, `group-data-collapsed/sidebar:` variants hide what
  * doesn't fit, so the server-rendered parts need no state of their own.
@@ -47,7 +48,7 @@ export function SidebarFrame({
       <aside
         data-collapsed={collapsed || undefined}
         className={cn(
-          "group/sidebar sticky top-0 flex h-screen shrink-0 flex-col self-start overflow-x-hidden overflow-y-auto border-r border-line bg-sidebar motion-safe:transition-[width] motion-safe:duration-200",
+          "group/sidebar sticky top-0 hidden h-screen shrink-0 flex-col self-start overflow-x-hidden overflow-y-auto border-r border-line bg-sidebar motion-safe:transition-[width] motion-safe:duration-200 md:flex",
           collapsed ? "w-12" : "w-[260px]",
         )}
       >

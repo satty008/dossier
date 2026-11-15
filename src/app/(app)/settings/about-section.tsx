@@ -13,6 +13,7 @@ import { UPGRADE_GUIDE_URL, type Release } from "@/lib/releases";
 import { chooseUsagePing } from "../actions";
 import { USAGE_PING_PRIVACY_URL } from "../usage-ping-dialog";
 import { checkUpdates, updateSettings } from "./actions";
+import { InstallApp } from "./install-app";
 import { SettingsSectionIntro } from "./settings-screen";
 
 export type AboutFacts = { label: string; value: string }[];
@@ -106,6 +107,7 @@ export function AboutSection({ facts, usagePing, updates }: { facts: AboutFacts;
           ))}
         </dl>
       </Card>
+      <InstallApp />
       <Card padding="none" className="flex flex-wrap items-center justify-between gap-3 px-7 py-4">
         <div className="flex flex-col gap-0.5">
           <span className="text-sm font-medium">Setup guide</span>

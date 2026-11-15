@@ -56,6 +56,8 @@ Exports you download and database dumps you take are copies outside Dossier's re
 
 Nothing else is sent. Your browser loads nothing from other sites (the Content-Security-Policy forbids it), and Next.js's telemetry and the Prisma tool's check-in with checkpoint.prisma.io are both off.
 
+Installed as an app on a phone or a computer, Dossier keeps nothing there either. Its service worker stores no pages, documents or data, so signing out leaves no copy of your profile or applications on the device; all it does is show a short page of its own when your server can't be reached.
+
 The agent's searches share one daily schedule and one AI score/draft limit per batch, not a limit per search. The whole batch waits until its source requests fit the rolling budget, so quota deferral can shift its run time. After an interruption every reserved request still counts, even if not sent. Per-search “source request completed” and found/new counts describe collection, not successful model evaluation; searches may overlap, and the batch outcome reports evaluation failures separately.
 
 ### What a hosted AI provider receives

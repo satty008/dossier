@@ -13,10 +13,10 @@ import { useExpandSidebar, useSidebarCollapsed } from "./sidebar-frame";
 const TARGET = "inline-flex min-h-6 items-center";
 const LINK = `${TARGET} font-medium text-ink underline underline-offset-2`;
 
-/** The first link or button after `element` in the sidebar, in document order. */
+/** The first link or button after `element` in the sidebar (or the phone's menu), in document order. */
 function nextControl(element: HTMLElement | null): HTMLElement | null {
   if (!element) return null;
-  const controls = (element.closest("aside") ?? document.body).querySelectorAll<HTMLElement>("a[href], button");
+  const controls = (element.closest("aside, [role='dialog']") ?? document.body).querySelectorAll<HTMLElement>("a[href], button");
   return [...controls].find((control) => element.compareDocumentPosition(control) & Node.DOCUMENT_POSITION_FOLLOWING && !element.contains(control)) ?? null;
 }
 

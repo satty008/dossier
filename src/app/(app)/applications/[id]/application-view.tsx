@@ -619,7 +619,7 @@ export function ApplicationView({
   const letterStored = new Set(letter?.units.map((unit) => unit.id));
   const emailUnits = email && shown(DocumentKind.EMAIL, email);
   const paragraphs = letterUnits?.filter(isParagraph).map((unit) => unit.text) ?? [];
-  const hint = "Hover a section to edit or regenerate it";
+  const hint = <PointerHint hover="Hover a section to edit or regenerate it" touch="Tap a section to edit or regenerate it" />;
 
   const restore = async (version: ViewedVersion) => {
     setRestoring(true);
@@ -711,7 +711,7 @@ export function ApplicationView({
         }
       >
         {/* Its underline runs the header's full width, under the padding too. */}
-        <TabsList aria-label="Application" className="-mx-10 px-10">
+        <TabsList aria-label="Application" className="-mx-(--page-gutter) px-(--page-gutter)">
           <TabsTrigger value="resume">Resume</TabsTrigger>
           <TabsTrigger value="letter">Cover letter</TabsTrigger>
           <TabsTrigger value="email">Email</TabsTrigger>
@@ -823,7 +823,7 @@ export function ApplicationView({
             units={viewed(DocumentKind.EMAIL)?.units ?? emailUnits}
             renderUnit={viewed(DocumentKind.EMAIL) || !emailUnits ? plainUnit : unitsOf(DocumentKind.EMAIL, emailUnits)}
             history={historyButton(DocumentKind.EMAIL)}
-            hint={viewed(DocumentKind.EMAIL) ? undefined : "Hover a part to edit or regenerate it"}
+            hint={viewed(DocumentKind.EMAIL) ? undefined : <PointerHint hover="Hover a part to edit or regenerate it" touch="Tap a part to edit or regenerate it" />}
             notice={viewed(DocumentKind.EMAIL) ? versionBanner(viewed(DocumentKind.EMAIL)!) : undefined}
             writing={emailJob !== null}
             onWrite={() => void writeEmail()}
@@ -918,6 +918,16 @@ function useFlashing() {
   };
 
   return { keys, start };
+}
+
+/** A hint that says "Hover" with a mouse and "Tap" on a touch screen, which has no hovering. */
+function PointerHint({ hover, touch }: { hover: string; touch: string }) {
+  return (
+    <>
+      <span className="pointer-coarse:hidden">{hover}</span>
+      <span className="hidden pointer-coarse:inline">{touch}</span>
+    </>
+  );
 }
 
 /**

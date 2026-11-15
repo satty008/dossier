@@ -69,6 +69,24 @@ describe("ThemeToggle", () => {
     expect(document.documentElement.dataset.theme).toBe("light");
   });
 
+  it("colours the browser's bar at once with the scheme chosen, in the one colour", async () => {
+    // As the root layout draws them with no choice made: one tag for each of the system's schemes.
+    document.head.insertAdjacentHTML(
+      "beforeend",
+      '<meta name="theme-color" content="#f4f2ed" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#22201d" media="(prefers-color-scheme: dark)">',
+    );
+    const tags = () => [...document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')];
+    try {
+      renderSidebar();
+      await userEvent.click(screen.getByRole("button", { name: "Dark mode" }));
+      expect(tags().map((tag) => [tag.content, tag.hasAttribute("media")])).toEqual([["#22201d", false], ["#22201d", false]]);
+      await userEvent.click(screen.getByRole("button", { name: "Light mode" }));
+      expect(tags().map((tag) => tag.content)).toEqual(["#f4f2ed", "#f4f2ed"]);
+    } finally {
+      tags().forEach((tag) => tag.remove());
+    }
+  });
+
   it("follows a dark system until a choice is made", () => {
     systemDark = true;
     renderSidebar();

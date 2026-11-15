@@ -12,9 +12,9 @@ export function createNonce(): string {
  * Scripts only with this request's nonce ('strict-dynamic' lets them load the
  * rest); styles may be inline, since React renders style attributes, which a
  * nonce can't cover. Nothing loads from other hosts, and no other site may
- * frame Dossier. `upgrade-insecure-requests` only over HTTPS, so a server on
- * plain HTTP in a home network keeps working. Development needs eval for
- * React's error overlay.
+ * frame Dossier; its service worker and manifest are its own.
+ * `upgrade-insecure-requests` only over HTTPS, so a server on plain HTTP in a
+ * home network keeps working. Development needs eval for React's error overlay.
  */
 export function contentSecurityPolicy(nonce: string, { dev = false, https = false }: { dev?: boolean; https?: boolean } = {}): string {
   return [
@@ -24,6 +24,9 @@ export function contentSecurityPolicy(nonce: string, { dev = false, https = fals
     "img-src 'self' blob: data:",
     "font-src 'self'",
     "connect-src 'self'",
+    // Said outright: with 'strict-dynamic', 'self' in script-src no longer counts, and a worker falls back to script-src.
+    "worker-src 'self'",
+    "manifest-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
