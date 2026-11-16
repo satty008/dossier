@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
-import { resetData, sql } from "./support";
+import { keepScore, LONG_SCORE, resetData, roomAround, sql } from "./support";
 
 // Dossier on a phone: below 768px the sidebar gives way to a bar of the main
 // sections at the bottom of the screen and a menu with the rest, every screen
@@ -216,6 +216,34 @@ test("a field's text is 16px, so iOS doesn't zoom the page in when it's tapped",
   await page.goto("/jobs");
   await expect(page.getByLabel("What")).toHaveCSS("font-size", "16px");
   await expect(page.getByLabel("Country")).toHaveCSS("font-size", "16px");
+});
+
+test("a long score stays in the posting's panel, which ends above the list of postings", async ({ page }) => {
+  await page.goto("/jobs");
+  await page.getByRole("search", { name: "Search postings" }).getByRole("button", { name: "Search" }).tap();
+  const panel = page.locator("section", { has: page.getByRole("region", { name: "Posting text" }) });
+  await expect(panel.getByRole("heading", { level: 2, name: "Senior Product Designer, Payments" })).toBeVisible();
+
+  // The longest score there can be, as a model words it; the fake AI's is a line, which never filled the panel.
+  await keepScore("e2e-ledgerly", LONG_SCORE);
+  try {
+    await page.reload();
+    await expect(panel.getByText("Good fit · 82 of 100")).toBeVisible();
+    const lastWorry = panel.getByText(LONG_SCORE.redFlags[2]);
+    const text = panel.getByRole("region", { name: "Posting text" });
+
+    // The panel grows to hold the score, so nothing reaches out of it over the postings below, and the posting's text keeps its room.
+    expect(await panel.evaluate((element) => element.scrollHeight - element.clientHeight)).toBe(0);
+    await lastWorry.scrollIntoViewIfNeeded();
+    expect((await roomAround(lastWorry, panel)).below).toBeGreaterThanOrEqual(0);
+    expect((await text.boundingBox())!.height).toBeGreaterThan(150);
+    const [panelBox, listBox] = [(await panel.boundingBox())!, (await page.getByRole("list", { name: "Postings" }).boundingBox())!];
+    expect(panelBox.y + panelBox.height).toBeLessThanOrEqual(listBox.y);
+    expect(await sideways(page)).toBe(0);
+    await expectAccessible(page);
+  } finally {
+    await sql(`DELETE FROM "PostingScore"`);
+  }
 });
 
 test("a computer's window narrowed to a phone's gets the phone's layout, and back", async ({ page }) => {

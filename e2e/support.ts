@@ -104,6 +104,48 @@ export async function resetData(): Promise<void> {
   await answerUsagePing("off");
 }
 
+/**
+ * A score at its longest: as many reasons and worries as the scorer may write (four and three, src/lib/ai/tasks/score-posting.ts),
+ * the way a real model words them. The fake AI's scores have one line each, which never filled the posting's panel in Find jobs.
+ */
+export const LONG_SCORE = {
+  score: 82,
+  reasons: [
+    "The posting asks for five or more years designing payment and onboarding flows, and the profile shows seven years of product design, the last three on Northwind Logistics' operational tools.",
+    "It wants hands-on prototyping in Figma with a shared component library; the profile lists Figma and a design system built at Northwind that several teams used.",
+    "Working with engineers and researchers from discovery to launch is central here, and the profile's shipped projects describe exactly that kind of partnership.",
+    "The salary range of EUR 75,000 to 90,000 sits inside what the profile says it is looking for.",
+  ],
+  redFlags: [
+    "The posting requires fluent Dutch for customer interviews; the profile lists English and German only.",
+    "Fintech experience is preferred, and none of the profile's roles are in payments or banking.",
+    "The role is on site three days a week in Rotterdam, while the profile prefers remote work.",
+  ],
+};
+
+/** Keeps a score for a posting the fake JSearch found (E14), as if it had been scored: shown from the next load of Find jobs. */
+export async function keepScore(externalId: string, fit: { score: number; reasons: string[]; redFlags: string[] }): Promise<void> {
+  await sql(
+    `INSERT INTO "PostingScore" (source, "externalId", score, reasons, "redFlags", "scoredWith", "updatedAt")
+     VALUES ('JSEARCH', $1, $2, $3::jsonb, $4::jsonb, 'score-posting@2', now())
+     ON CONFLICT (source, "externalId") DO UPDATE SET score = EXCLUDED.score, reasons = EXCLUDED.reasons, "redFlags" = EXCLUDED."redFlags", "updatedAt" = now()`,
+    [externalId, fit.score, JSON.stringify(fit.reasons), JSON.stringify(fit.redFlags)],
+  );
+}
+
+/**
+ * How much room `inner` has above and below it within `outer`, in pixels, measured at one instant (the page may scroll between two
+ * separate measurements): both are 0 or more while `inner` lies wholly inside `outer`, and one is negative where it spills out.
+ */
+export async function roomAround(inner: Locator, outer: Locator): Promise<{ above: number; below: number }> {
+  const container = await outer.elementHandle();
+  return inner.evaluate((element, box) => {
+    const a = element.getBoundingClientRect();
+    const b = box.getBoundingClientRect();
+    return { above: Math.round(a.top - b.top), below: Math.round(b.bottom - a.bottom) };
+  }, container);
+}
+
 /** The startups' pages the app asked the fake sites for (#222), with its user agent. */
 export async function fakeStartupRequests(): Promise<{ url: string; userAgent: string }[]> {
   const response = await fetch(`http://localhost:${FAKE_JOBS_PORT}/startup-requests`);

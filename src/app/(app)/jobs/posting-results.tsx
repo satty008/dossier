@@ -449,7 +449,7 @@ function PostingDetail({
     <section
       ref={ref}
       aria-labelledby={headingId}
-      className="flex min-w-0 flex-[999_1_420px] scroll-mt-[121px] flex-col gap-4 rounded-panel border border-line-card bg-card p-7 max-lg:order-first max-lg:max-h-[75dvh] lg:sticky lg:top-[121px] lg:max-h-[calc(100dvh-145px)]"
+      className="flex min-w-0 flex-[999_1_420px] flex-col gap-4 rounded-panel border border-line-card bg-card p-5 max-lg:order-first sm:p-7 md:scroll-mt-[121px] lg:sticky lg:top-[121px] lg:max-h-[calc(100dvh-145px)] lg:overflow-y-auto"
     >
       <div className="flex flex-col gap-1.5">
         <h2 id={headingId} className="font-serif text-section text-pretty">
@@ -512,8 +512,18 @@ function PostingDetail({
         state.score && <FitDetails fit={state.score} />
       )}
 
-      {/* Only the text scrolls, so the title and actions stay in view; focusable, so it scrolls from the keyboard too. */}
-      <div tabIndex={0} role="region" aria-label="Posting text" className="-mx-1 min-h-0 flex-1 overflow-y-auto border-t border-line px-1 pt-4">
+      {/*
+        The text scrolls on its own, so a long posting doesn't push the list away; focusable, so it scrolls from the keyboard too.
+        Beside the list the panel is no taller than the window and the text gives way first. A long score (up to four reasons and
+        three worries) would make it give way entirely and the rest spill out of the panel, so the text keeps 12rem and the panel
+        scrolls instead. Above the list the panel just grows, and the text stops at half the window.
+      */}
+      <div
+        tabIndex={0}
+        role="region"
+        aria-label="Posting text"
+        className="-mx-1 flex-1 overflow-y-auto border-t border-line px-1 pt-4 max-lg:max-h-[max(14rem,50dvh)] lg:min-h-48"
+      >
         {text.status === "loading" ? (
           <p role="status" className="text-sm text-muted">
             Getting the whole posting…

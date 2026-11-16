@@ -1,6 +1,6 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Locator } from "@playwright/test";
 
-import { fakeJobSearches, resetData, sql } from "./support";
+import { fakeJobSearches, keepScore, LONG_SCORE, resetData, roomAround, sql } from "./support";
 
 // Find jobs (E14) against the fake job sources: search from the profile's
 // role and city, come back to the kept search without asking again, save,
@@ -110,6 +110,38 @@ test("scores a posting against the profile, and keeps the score (#208)", async (
   await expect(page.getByText("Excellent fit · 91 of 100")).toBeVisible();
   await expect(page.getByRole("button", { name: "Score again" })).toBeVisible();
   await sql(`DELETE FROM "PostingScore"`);
+});
+
+test("a long score scrolls inside the posting's panel, and the text stays in reach (#208)", async ({ page }) => {
+  // A laptop's window: beside the list the panel is no taller than the window, and the score fills most of it.
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/jobs");
+  await page.getByRole("search", { name: "Search postings" }).getByRole("button", { name: "Search" }).click();
+  const panel = page.locator("section", { has: page.getByRole("region", { name: "Posting text" }) });
+  await expect(panel.getByRole("heading", { level: 2, name: "Senior Product Designer, Payments" })).toBeVisible();
+
+  // The longest score there can be, as a model words it; the fake AI's is a line, which never filled the panel.
+  await keepScore("e2e-ledgerly", LONG_SCORE);
+  try {
+    await page.reload();
+    await expect(panel.getByText("Good fit · 82 of 100")).toBeVisible();
+    expect((await panel.boundingBox())!.height).toBeLessThanOrEqual(720 - 145 + 1);
+
+    // Every part of it is reached by scrolling the panel, and none reaches out of it.
+    const expectInside = async (part: Locator) => {
+      await part.scrollIntoViewIfNeeded();
+      const room = await roomAround(part, panel);
+      expect(room.above).toBeGreaterThanOrEqual(0);
+      expect(room.below).toBeGreaterThanOrEqual(0);
+    };
+    const text = panel.getByRole("region", { name: "Posting text" });
+    await expectInside(panel.getByText(LONG_SCORE.redFlags[2]));
+    await expectInside(text);
+    // Room for a few lines at least, however long the score.
+    expect((await text.boundingBox())!.height).toBeGreaterThanOrEqual(190);
+  } finally {
+    await sql(`DELETE FROM "PostingScore"`);
+  }
 });
 
 test("scores with Jev once it's chosen in Settings → Scoring (#274)", async ({ page }) => {
